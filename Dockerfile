@@ -21,4 +21,3 @@ COPY --from=builder /app/pixoo64 .
 COPY --from=builder /app/static ./static
 
 CMD ["./pixoo64"]
-
