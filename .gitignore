@@ -3,6 +3,4 @@
 .env*
 !.env.example
 
-weather.json
-test.png
-todo
+dev/

@@ -2,5 +2,5 @@
 Divoom pixoo64 display for home usage
 
 
-<img src="example.png" alt="пример картинки" width="448"/>
+<img src="static/readme/example.png" alt="example" width="448"/>
 
