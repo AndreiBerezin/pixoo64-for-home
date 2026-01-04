@@ -13,6 +13,7 @@ import (
 
 func GetYandexData() (*intTypes.YandexData, error) {
 	log.Print("Getting yandex data...")
+	//response, err := callApi()
 	response, err := getMockYandexData()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get yandex data: %w", err)
@@ -64,7 +65,7 @@ func GetYandexData() (*intTypes.YandexData, error) {
 }
 
 func getMockYandexData() (*yandexWeatherResponse, error) {
-	file, err := os.Open("weather.json")
+	file, err := os.Open("mocks/yandex_weather.json")
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,7 @@ func getMockYandexData() (*yandexWeatherResponse, error) {
 }
 
 func callApi() (*yandexWeatherResponse, error) {
-	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=%s&lon=%s", os.Getenv("YANDEX_LAT"), os.Getenv("YANDEX_LON"))
+	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=%s&lon=%s", os.Getenv("YANDEX_WEATHER_LAT"), os.Getenv("YANDEX_WEATHER_LON"))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading .env file", err)
+	_ = godotenv.Load()
+	if os.Getenv("PIXOO_ADDRESS") == "" {
+		log.Fatal("PIXOO_ADDRESS is not set, check env")
 	}
 
 	collector := collector.NewCollector()
@@ -56,7 +56,7 @@ func main() {
 			draw(drawer)
 			pixoo64Draw(drawer)
 
-			log.Print("draw data")
+			log.Print("data draw finished")
 			time.Sleep(1 * time.Minute)
 		}
 	}()
@@ -65,7 +65,11 @@ func main() {
 }
 
 func draw(drawer *drawer.Drawer) {
-	filename := "test.png"
+	filename := os.Getenv("DEV_IMG_FILENAME")
+	if filename == "" {
+		return
+	}
+
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -97,6 +101,8 @@ func pixoo64Draw(drawer *drawer.Drawer) {
 	if err != nil {
 		log.Fatal("failed to send http text", err)
 	}*/
+
+	log.Print("draw on pixoo64")
 }
 
 func waitShutdownSignal() {
