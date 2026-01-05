@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/drawer"
-	intTypes "github.com/AndreiBerezin/pixoo64/internal/integrations/types"
 )
 
 type CurrentWeatherScreen struct {
@@ -19,7 +19,7 @@ func NewCurrentWeatherScreen(drawer *drawer.Drawer) (*CurrentWeatherScreen, erro
 	return &CurrentWeatherScreen{drawer: drawer}, nil
 }
 
-func (s *CurrentWeatherScreen) DrawStatic(data *intTypes.YandexData) error {
+func (s *CurrentWeatherScreen) DrawStatic(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}

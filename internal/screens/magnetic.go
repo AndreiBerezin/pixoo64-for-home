@@ -3,8 +3,8 @@ package screens
 import (
 	"image/color"
 
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/drawer"
-	intTypes "github.com/AndreiBerezin/pixoo64/internal/integrations/types"
 )
 
 type MagneticScreen struct {
@@ -15,7 +15,7 @@ func NewMagneticScreen(drawer *drawer.Drawer) (*MagneticScreen, error) {
 	return &MagneticScreen{drawer: drawer}, nil
 }
 
-func (s *MagneticScreen) DrawStatic(data *intTypes.MagneticData) error {
+func (s *MagneticScreen) DrawStatic(data *types.MagneticData) error {
 	if data == nil {
 		return nil
 	}

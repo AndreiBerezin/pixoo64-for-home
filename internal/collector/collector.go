@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/AndreiBerezin/pixoo64/internal/integrations"
-	intTypes "github.com/AndreiBerezin/pixoo64/internal/integrations/types"
+	"github.com/AndreiBerezin/pixoo64/internal/collector/integrations"
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 )
 
 const (
@@ -23,9 +23,9 @@ type Collector struct {
 }
 
 type CollectedData struct {
-	YandexData   *intTypes.YandexData
-	MagneticData *intTypes.MagneticData
-	EventsData   *intTypes.EventsData
+	YandexData   *types.YandexData
+	MagneticData *types.MagneticData
+	EventsData   *types.EventsData
 }
 
 type metaItem struct {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/drawer"
-	intTypes "github.com/AndreiBerezin/pixoo64/internal/integrations/types"
 )
 
 type ExtraWeatherScreen struct {
@@ -16,7 +16,7 @@ func NewExtraWeatherScreen(drawer *drawer.Drawer) (*ExtraWeatherScreen, error) {
 	return &ExtraWeatherScreen{drawer: drawer}, nil
 }
 
-func (s *ExtraWeatherScreen) DrawTodayStatic(data *intTypes.YandexData) error {
+func (s *ExtraWeatherScreen) DrawTodayStatic(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
@@ -46,7 +46,7 @@ func (s *ExtraWeatherScreen) DrawTodayStatic(data *intTypes.YandexData) error {
 	return nil
 }
 
-func (s *ExtraWeatherScreen) DrawTomorrowStatic(data *intTypes.YandexData) error {
+func (s *ExtraWeatherScreen) DrawTomorrowStatic(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}

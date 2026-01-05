@@ -22,6 +22,8 @@ func main() {
 		log.Fatal("PIXOO_ADDRESS is not set, check env")
 	}
 
+	log.Print("app started")
+
 	collector := collector.NewCollector()
 	collector.Start()
 
@@ -53,7 +55,7 @@ func main() {
 				log.Fatal(err)
 			}
 
-			draw(drawer)
+			devImgDraw(drawer)
 			pixoo64Draw(drawer)
 
 			log.Print("data draw finished")
@@ -64,7 +66,7 @@ func main() {
 	waitShutdownSignal()
 }
 
-func draw(drawer *drawer.Drawer) {
+func devImgDraw(drawer *drawer.Drawer) {
 	filename := os.Getenv("DEV_IMG_FILENAME")
 	if filename == "" {
 		return
@@ -72,13 +74,13 @@ func draw(drawer *drawer.Drawer) {
 
 	file, err := os.Create(filename)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to create file: ", err)
 	}
 	defer file.Close()
 
 	png.Encode(file, drawer.Image())
 
-	log.Print("Image saved to ", filename)
+	log.Print("success draw dev image to ", filename)
 }
 
 func pixoo64Draw(drawer *drawer.Drawer) {
@@ -86,28 +88,28 @@ func pixoo64Draw(drawer *drawer.Drawer) {
 	var frames []frame.Frame
 	frame, err := frame.NewFrameImage(drawer.Image(), 400)
 	if err != nil {
-		log.Fatal("failed to create frame", err)
+		log.Fatal("failed to create frame: ", err)
 	}
 	frames = append(frames, *frame)
 
 	pixoo64.ResetHttpGifId(client)
 	err = pixoo64.SendHttpGif(client, 0, frames)
 	if err != nil {
-		log.Fatal("failed to send http gif", err)
+		log.Fatal("failed to send http gif: ", err)
 	}
 
 	/*time.Sleep(1 * time.Second)
 	err = pixoo64.SendHttpText(client, 0, "hello world", image.Point{X: 4, Y: 50}, "#00ff00", 0)
 	if err != nil {
-		log.Fatal("failed to send http text", err)
+		log.Fatal("failed to send http text: ", err)
 	}*/
 
-	log.Print("draw on pixoo64")
+	log.Print("success draw on pixoo64")
 }
 
 func waitShutdownSignal() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigChan
-	log.Print("received shutdown signal", sig)
+	log.Print("received shutdown signal: ", sig)
 }

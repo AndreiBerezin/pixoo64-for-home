@@ -8,29 +8,29 @@ import (
 	"net/http"
 	"os"
 
-	intTypes "github.com/AndreiBerezin/pixoo64/internal/integrations/types"
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 )
 
-func GetYandexData() (*intTypes.YandexData, error) {
+func GetYandexData() (*types.YandexData, error) {
 	log.Print("Getting yandex data...")
-	//response, err := callApi()
-	response, err := getMockYandexData()
+	response, err := callApi()
+	//response, err := getMockYandexData()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get yandex data: %w", err)
 	}
 
 	todayData := response.Forecasts[0]
 
-	return &intTypes.YandexData{
-		CurrentWeather: intTypes.YandexCurrentWeather{
+	return &types.YandexData{
+		CurrentWeather: types.YandexCurrentWeather{
 			Temperature:          int(response.Fact.Temperature),
 			FeelsLikeTemperature: int(response.Fact.FeelsLikeTemperature),
 			Icon:                 response.Fact.Icon.GetUrl(),
 			WindSpeed:            int(response.Fact.WindSpeed),
 			WindDirection:        response.Fact.WindDirection,
 		},
-		DayWeather: intTypes.YandexDayWeather{
-			Items: []intTypes.YandexDayItem{
+		DayWeather: types.YandexDayWeather{
+			Items: []types.YandexDayItem{
 				{
 					Name:        "у",
 					Icon:        todayData.Parts["morning"].Icon.GetUrl(),
@@ -53,11 +53,11 @@ func GetYandexData() (*intTypes.YandexData, error) {
 				},
 			},
 		},
-		Sun: intTypes.YandexSun{
+		Sun: types.YandexSun{
 			SunriseTime: todayData.Sunrise,
 			SunsetTime:  todayData.Sunset,
 		},
-		Moon: intTypes.YandexMoon{ // todo: вытащить откуда нибудь
+		Moon: types.YandexMoon{ // todo: вытащить откуда нибудь
 			MoonPhase: "",
 			MoonDay:   1,
 		},
