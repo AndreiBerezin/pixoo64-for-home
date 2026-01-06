@@ -15,8 +15,8 @@ type CurrentWeatherScreen struct {
 	drawer *drawer.Drawer
 }
 
-func NewCurrentWeatherScreen(drawer *drawer.Drawer) (*CurrentWeatherScreen, error) {
-	return &CurrentWeatherScreen{drawer: drawer}, nil
+func NewCurrentWeatherScreen(drawer *drawer.Drawer) *CurrentWeatherScreen {
+	return &CurrentWeatherScreen{drawer: drawer}
 }
 
 func (s *CurrentWeatherScreen) DrawStatic(data *types.YandexData) error {

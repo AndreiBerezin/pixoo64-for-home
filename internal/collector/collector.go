@@ -1,13 +1,13 @@
 package collector
 
 import (
-	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/integrations"
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
+	"github.com/AndreiBerezin/pixoo64/pkg/log"
+	"go.uber.org/zap"
 )
 
 const (
@@ -20,6 +20,10 @@ type Collector struct {
 	sync.RWMutex
 	collectedData *CollectedData
 	meta          map[string]metaItem
+
+	yandexWeather *integrations.YandexWeather
+	xras          *integrations.Xras
+	events        *integrations.Events
 }
 
 type CollectedData struct {
@@ -54,27 +58,25 @@ func NewCollector() *Collector {
 				collectedAt: time.Unix(0, 0),
 			},
 		},
+		yandexWeather: integrations.NewYandexWeather(),
+		xras:          integrations.NewXras(),
+		events:        integrations.NewEvents(),
 	}
 }
 
 func (c *Collector) Start() {
 	go func() {
 		for {
-			errors := c.collect()
-			for _, err := range errors {
-				log.Print(err)
-			}
+			c.collect()
 
 			time.Sleep(5 * time.Second)
 		}
 	}()
 }
 
-func (c *Collector) collect() []error {
+func (c *Collector) collect() {
 	c.Lock()
 	defer c.Unlock()
-
-	var errors []error
 
 	for name, meta := range c.meta {
 		if !meta.isExpired() {
@@ -86,30 +88,28 @@ func (c *Collector) collect() []error {
 
 		switch name {
 		case YandexDataName:
-			yandexData, err := integrations.GetYandexData()
+			yandexData, err := c.yandexWeather.Data()
 			if err != nil {
-				errors = append(errors, fmt.Errorf("failed to get yandex data: %w", err))
+				log.Error("failed to get yandex data: ", zap.Error(err))
 				continue
 			}
 			c.collectedData.YandexData = yandexData
 		case MagneticDataName:
-			magneticData, err := integrations.GetMagneticData()
+			magneticData, err := c.xras.Data()
 			if err != nil {
-				errors = append(errors, fmt.Errorf("failed to get magnetic data: %w", err))
+				log.Error("failed to get magnetic data: ", zap.Error(err))
 				continue
 			}
 			c.collectedData.MagneticData = magneticData
 		case EventsDataName:
-			eventsData, err := integrations.GetEventsData()
+			eventsData, err := c.events.Data()
 			if err != nil {
-				errors = append(errors, fmt.Errorf("failed to get events data: %w", err))
+				log.Error("failed to get events data: ", zap.Error(err))
 				continue
 			}
 			c.collectedData.EventsData = eventsData
 		}
 	}
-
-	return errors
 }
 
 // todo: тут нифига не лочится

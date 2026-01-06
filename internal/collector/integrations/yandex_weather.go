@@ -4,19 +4,32 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
+	"github.com/AndreiBerezin/pixoo64/pkg/env"
+	"github.com/AndreiBerezin/pixoo64/pkg/log"
 )
 
-func GetYandexData() (*types.YandexData, error) {
-	log.Print("Getting yandex data...")
-	response, err := callApi()
-	//response, err := getMockYandexData()
+type YandexWeather struct{}
+
+func NewYandexWeather() *YandexWeather {
+	return &YandexWeather{}
+}
+
+func (y *YandexWeather) Data() (*types.YandexData, error) {
+	log.Info("Getting yandex data...")
+
+	var response *yandexWeatherResponse
+	var err error
+	if env.IsDebug() {
+		response, err = y.mockResponse()
+	} else {
+		response, err = y.callApi()
+	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get yandex data: %w", err)
+		return nil, fmt.Errorf("failed to get yandex weather response: %w", err)
 	}
 
 	todayData := response.Forecasts[0]
@@ -64,7 +77,7 @@ func GetYandexData() (*types.YandexData, error) {
 	}, nil
 }
 
-func getMockYandexData() (*yandexWeatherResponse, error) {
+func (y *YandexWeather) mockResponse() (*yandexWeatherResponse, error) {
 	file, err := os.Open("mocks/yandex_weather.json")
 	if err != nil {
 		return nil, err
@@ -85,7 +98,7 @@ func getMockYandexData() (*yandexWeatherResponse, error) {
 	return response, nil
 }
 
-func callApi() (*yandexWeatherResponse, error) {
+func (y *YandexWeather) callApi() (*yandexWeatherResponse, error) {
 	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=%s&lon=%s", os.Getenv("YANDEX_WEATHER_LAT"), os.Getenv("YANDEX_WEATHER_LON"))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

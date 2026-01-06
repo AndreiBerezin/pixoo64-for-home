@@ -19,7 +19,7 @@ type Drawer struct {
 	img *image.RGBA
 }
 
-func NewDrawer() (*Drawer, error) {
+func NewDrawer() *Drawer {
 	img := image.NewRGBA(image.Rect(0, 0, 64, 64))
 	for y := 0; y < 64; y++ {
 		for x := 0; x < 64; x++ {
@@ -29,7 +29,7 @@ func NewDrawer() (*Drawer, error) {
 
 	return &Drawer{
 		img: img,
-	}, nil
+	}
 }
 
 func (d *Drawer) DrawString(text string, x int, y int, color color.Color, fontFace FontFace) {

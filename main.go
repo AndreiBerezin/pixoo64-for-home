@@ -2,7 +2,6 @@ package main
 
 import (
 	"image/png"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,16 +12,23 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/frame"
 	"github.com/AndreiBerezin/pixoo64/internal/pixoo64"
 	"github.com/AndreiBerezin/pixoo64/internal/screens"
+	"github.com/AndreiBerezin/pixoo64/pkg/env"
+	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 func main() {
+	log.Init()
+	defer log.Sync()
+
 	_ = godotenv.Load()
-	if os.Getenv("PIXOO_ADDRESS") == "" {
-		log.Fatal("PIXOO_ADDRESS is not set, check env")
+	pixooAddress := os.Getenv("PIXOO_ADDRESS")
+	if pixooAddress == "" {
+		log.Fatal("PIXOO_ADDRESS is not set, please check your environment variables")
 	}
 
-	log.Print("app started")
+	log.Info("app started")
 
 	collector := collector.NewCollector()
 	collector.Start()
@@ -32,33 +38,30 @@ func main() {
 		for {
 			data := collector.GetCollectedData()
 
-			drawer, err := drawer.NewDrawer()
-			if err != nil {
-				log.Fatal(err)
-			}
+			drawer := drawer.NewDrawer()
 
-			weatherScreen, err := screens.NewCurrentWeatherScreen(drawer)
+			weatherScreen := screens.NewCurrentWeatherScreen(drawer)
+
+			err := weatherScreen.DrawStatic(data.YandexData)
 			if err != nil {
-				log.Fatal(err)
-			}
-			weatherScreen.DrawStatic(data.YandexData)
-			if err != nil {
-				log.Fatal(err)
+				log.Fatal("failed to draw weather screen: ", zap.Error(err))
 			}
 
 			extraWeatherScreen, err := screens.NewExtraWeatherScreen(drawer)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("failed to create extra weather screen: ", zap.Error(err))
 			}
 			extraWeatherScreen.DrawTodayStatic(data.YandexData)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("failed to draw extra weather screen: ", zap.Error(err))
 			}
 
-			devImgDraw(drawer)
+			if env.IsDebug() {
+				devImgDraw(drawer)
+			}
 			pixoo64Draw(drawer)
 
-			log.Print("data draw finished")
+			log.Debug("data draw finished")
 			time.Sleep(1 * time.Minute)
 		}
 	}()
@@ -67,20 +70,16 @@ func main() {
 }
 
 func devImgDraw(drawer *drawer.Drawer) {
-	filename := os.Getenv("DEV_IMG_FILENAME")
-	if filename == "" {
-		return
-	}
-
+	filename := "dev_img.png"
 	file, err := os.Create(filename)
 	if err != nil {
-		log.Fatal("failed to create file: ", err)
+		log.Fatal("failed to create file: ", zap.Error(err))
 	}
 	defer file.Close()
 
 	png.Encode(file, drawer.Image())
 
-	log.Print("success draw dev image to ", filename)
+	log.Debug("success draw dev image to " + filename)
 }
 
 func pixoo64Draw(drawer *drawer.Drawer) {
@@ -88,14 +87,14 @@ func pixoo64Draw(drawer *drawer.Drawer) {
 	var frames []frame.Frame
 	frame, err := frame.NewFrameImage(drawer.Image(), 400)
 	if err != nil {
-		log.Fatal("failed to create frame: ", err)
+		log.Fatal("failed to create frame: ", zap.Error(err))
 	}
 	frames = append(frames, *frame)
 
 	pixoo64.ResetHttpGifId(client)
 	err = pixoo64.SendHttpGif(client, 0, frames)
 	if err != nil {
-		log.Fatal("failed to send http gif: ", err)
+		log.Fatal("failed to send http gif: ", zap.Error(err))
 	}
 
 	/*time.Sleep(1 * time.Second)
@@ -104,12 +103,12 @@ func pixoo64Draw(drawer *drawer.Drawer) {
 		log.Fatal("failed to send http text: ", err)
 	}*/
 
-	log.Print("success draw on pixoo64")
+	log.Debug("success draw on pixoo64")
 }
 
 func waitShutdownSignal() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigChan
-	log.Print("received shutdown signal: ", sig)
+	log.Info("received shutdown signal: " + sig.String())
 }

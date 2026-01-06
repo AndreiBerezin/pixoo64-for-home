@@ -1,9 +1,10 @@
 package drawer
 
 import (
-	"log"
 	"os"
 
+	"github.com/AndreiBerezin/pixoo64/pkg/log"
+	"go.uber.org/zap"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -32,13 +33,13 @@ func init() {
 func newFont(filename string, size int) font.Face {
 	fontBytes, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal("failed to load font: %w", err)
+		log.Fatal("failed to load font: ", zap.Error(err))
 		return nil
 	}
 
 	ttfFont, err := opentype.Parse(fontBytes)
 	if err != nil {
-		log.Fatal("failed to parse font: %w", err)
+		log.Fatal("failed to parse font: ", zap.Error(err))
 		return nil
 	}
 
@@ -48,7 +49,7 @@ func newFont(filename string, size int) font.Face {
 		Hinting: font.HintingNone,
 	})
 	if err != nil {
-		log.Fatal("failed to create face: %w", err)
+		log.Fatal("failed to create face: ", zap.Error(err))
 		return nil
 	}
 

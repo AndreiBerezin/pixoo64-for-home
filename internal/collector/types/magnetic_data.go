@@ -1,13 +1,11 @@
 package types
 
 type MagneticData struct {
-	ByHours []MagneticHour
-	ByDays  []MagneticDay
+	Days []MagneticDay
 }
 
 type MagneticDay struct {
-	Day   int
-	Level float32
+	Hours []MagneticHour
 }
 
 type MagneticHour struct {
