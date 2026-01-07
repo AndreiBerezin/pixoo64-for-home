@@ -14,6 +14,8 @@ FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates tzdata
 
+ENV TZ=Europe/Moscow
+
 WORKDIR /app
 
 COPY --from=builder /app/pixoo64 .

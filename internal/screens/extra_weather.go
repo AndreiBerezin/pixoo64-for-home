@@ -23,10 +23,6 @@ func (s *ExtraWeatherScreen) DrawTodayStatic(data *types.YandexData) error {
 
 	startY := 45
 
-	/*s.drawer.DrawString(data.Sun.SunriseTime, 2, startY, color.RGBA{255, 255, 255, 255}, drawer.FontNormal)
-	s.drawer.DrawPNG("images/sunrise.png", 21, startY-8, 10)
-	s.drawer.DrawString(data.Sun.SunsetTime, 34, startY, color.RGBA{255, 255, 255, 255}, drawer.FontNormal)*/
-
 	for i, item := range data.DayWeather.Items {
 		temperature := fmt.Sprintf("%ḋ", item.Temperature)
 		if item.Temperature > 0 {

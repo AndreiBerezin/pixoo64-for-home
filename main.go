@@ -19,10 +19,11 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load()
+
 	log.Init()
 	defer log.Sync()
 
-	_ = godotenv.Load()
 	pixooAddress := os.Getenv("PIXOO_ADDRESS")
 	if pixooAddress == "" {
 		log.Fatal("PIXOO_ADDRESS is not set, please check your environment variables")
@@ -47,13 +48,22 @@ func main() {
 				log.Fatal("failed to draw weather screen: ", zap.Error(err))
 			}
 
-			extraWeatherScreen, err := screens.NewExtraWeatherScreen(drawer)
+			/*extraWeatherScreen, err := screens.NewExtraWeatherScreen(drawer)
 			if err != nil {
 				log.Fatal("failed to create extra weather screen: ", zap.Error(err))
 			}
-			extraWeatherScreen.DrawTodayStatic(data.YandexData)
+			err = extraWeatherScreen.DrawTodayStatic(data.YandexData)
 			if err != nil {
 				log.Fatal("failed to draw extra weather screen: ", zap.Error(err))
+			}*/
+
+			magneticScreen, err := screens.NewMagneticScreen(drawer)
+			if err != nil {
+				log.Fatal("failed to create magnetic screen: ", zap.Error(err))
+			}
+			err = magneticScreen.DrawStatic(data.MagneticData, data.YandexData)
+			if err != nil {
+				log.Fatal("failed to draw magnetic screen: ", zap.Error(err))
 			}
 
 			if env.IsDebug() {

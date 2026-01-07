@@ -5,6 +5,7 @@ type MagneticData struct {
 }
 
 type MagneticDay struct {
+	Day   string
 	Hours []MagneticHour
 }
 
