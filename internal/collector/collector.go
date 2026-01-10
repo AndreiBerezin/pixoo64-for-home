@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -32,6 +34,21 @@ type CollectedData struct {
 	EventsData   *types.EventsData
 }
 
+func (c *CollectedData) Clone() (*CollectedData, error) {
+	copy, err := json.Marshal(c)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal collected data: %w", err)
+	}
+
+	var collectedData CollectedData
+	err = json.Unmarshal(copy, &collectedData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal collected data: %w", err)
+	}
+
+	return &collectedData, nil
+}
+
 type metaItem struct {
 	ttl         time.Duration
 	collectedAt time.Time
@@ -41,7 +58,7 @@ func (c metaItem) isExpired() bool {
 	return time.Since(c.collectedAt) > c.ttl
 }
 
-func NewCollector() *Collector {
+func New() *Collector {
 	return &Collector{
 		collectedData: &CollectedData{},
 		meta: map[string]metaItem{
@@ -112,10 +129,14 @@ func (c *Collector) collect() {
 	}
 }
 
-// todo: тут нифига не лочится
-func (c *Collector) GetCollectedData() CollectedData {
+func (c *Collector) GetCollectedData() (*CollectedData, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	return *c.collectedData
+	collectedData, err := c.collectedData.Clone()
+	if err != nil {
+		return nil, fmt.Errorf("failed to clone collected data: %w", err)
+	}
+
+	return collectedData, nil
 }

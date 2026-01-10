@@ -112,7 +112,7 @@ func (x *Xras) mockResponse() (*xrasResponse, error) {
 }
 
 func (x *Xras) callApi() (*xrasResponse, error) {
-	req, err := http.NewRequest("GET", "https://xras.ru/txt/kpf_RAL5.json", nil)
+	req, err := http.NewRequest("GET", "https://xras.ru/txt/kpf_S0KJ.json", nil)
 	if err != nil {
 		return nil, err
 	}
