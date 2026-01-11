@@ -19,7 +19,7 @@ ENV TZ=Europe/Moscow
 WORKDIR /app
 
 COPY --from=builder /app/pixoo64 .
-
+COPY --from=builder /app/cache ./cache
 COPY --from=builder /app/static ./static
 COPY --from=builder /app/mocks ./mocks
 
