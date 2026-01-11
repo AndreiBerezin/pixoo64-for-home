@@ -17,6 +17,8 @@ import (
 const (
 	BottomScreenExtraWeather = 0
 	BottomScreenMagneticSun  = 1
+
+	drawInterval = 1 * time.Minute
 )
 
 type State struct {
@@ -32,6 +34,11 @@ func NewState(collector *collector.Collector) *State {
 }
 
 func (s *State) Start() {
+	drawer := drawer.NewDrawer()
+	weatherScreen := NewCurrentWeatherScreen(drawer)
+	extraWeatherScreen := NewExtraWeatherScreen(drawer)
+	magneticSunScreen := NewMagneticSunScreen(drawer)
+
 	go func() {
 		for {
 			data, err := s.collector.GetCollectedData()
@@ -39,9 +46,7 @@ func (s *State) Start() {
 				log.Fatal("failed to get collected data: ", zap.Error(err))
 			}
 
-			drawer := drawer.NewDrawer()
-
-			weatherScreen := NewCurrentWeatherScreen(drawer)
+			drawer.Reset()
 
 			err = weatherScreen.DrawStatic(data.YandexData)
 			if err != nil {
@@ -50,10 +55,6 @@ func (s *State) Start() {
 
 			switch s.currentBottomScreen {
 			case BottomScreenExtraWeather:
-				extraWeatherScreen, err := NewExtraWeatherScreen(drawer)
-				if err != nil {
-					log.Fatal("failed to create extra weather screen: ", zap.Error(err))
-				}
 				err = extraWeatherScreen.DrawTodayStatic(data.YandexData)
 				if err != nil {
 					log.Fatal("failed to draw extra weather screen: ", zap.Error(err))
@@ -61,10 +62,6 @@ func (s *State) Start() {
 
 				s.currentBottomScreen = BottomScreenMagneticSun
 			case BottomScreenMagneticSun:
-				magneticSunScreen, err := NewMagneticSunScreen(drawer)
-				if err != nil {
-					log.Fatal("failed to create magnetic screen: ", zap.Error(err))
-				}
 				err = magneticSunScreen.DrawStatic(data.MagneticData, data.YandexData)
 				if err != nil {
 					log.Fatal("failed to draw magnetic screen: ", zap.Error(err))
@@ -79,7 +76,7 @@ func (s *State) Start() {
 			pixoo64Draw(drawer)
 
 			log.Debug("data draw finished")
-			time.Sleep(1 * time.Minute)
+			time.Sleep(drawInterval)
 		}
 	}()
 }
@@ -98,7 +95,8 @@ func devImgDraw(drawer *drawer.Drawer) {
 }
 
 func pixoo64Draw(drawer *drawer.Drawer) {
-	client := pixoo64.NewClient(os.Getenv("PIXOO_ADDRESS"))
+	pixoo64 := pixoo64.NewPixoo64()
+
 	var frames []frame.Frame
 	frame, err := frame.NewFrameImage(drawer.Image(), 400)
 	if err != nil {
@@ -106,8 +104,8 @@ func pixoo64Draw(drawer *drawer.Drawer) {
 	}
 	frames = append(frames, *frame)
 
-	pixoo64.ResetHttpGifId(client)
-	err = pixoo64.SendHttpGif(client, 0, frames)
+	pixoo64.ResetHttpGifId()
+	err = pixoo64.SendHttpGif(0, frames)
 	if err != nil {
 		log.Fatal("failed to send http gif: ", zap.Error(err))
 	}

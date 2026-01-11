@@ -11,8 +11,8 @@ type MagneticSunScreen struct {
 	drawer *drawer.Drawer
 }
 
-func NewMagneticSunScreen(drawer *drawer.Drawer) (*MagneticSunScreen, error) {
-	return &MagneticSunScreen{drawer: drawer}, nil
+func NewMagneticSunScreen(drawer *drawer.Drawer) *MagneticSunScreen {
+	return &MagneticSunScreen{drawer: drawer}
 }
 
 func (s *MagneticSunScreen) DrawStatic(magneticData *types.MagneticData, yandexData *types.YandexData) error {

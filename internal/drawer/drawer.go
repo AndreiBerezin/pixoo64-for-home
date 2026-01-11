@@ -1,13 +1,17 @@
 package drawer
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
-	"net/http"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/AndreiBerezin/pixoo64/pkg/http_client"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/draw"
@@ -16,19 +20,30 @@ import (
 )
 
 type Drawer struct {
-	img *image.RGBA
+	client *http_client.Client
+	img    *image.RGBA
+	cache  *Cache
 }
 
 func NewDrawer() *Drawer {
-	img := image.NewRGBA(image.Rect(0, 0, 64, 64))
-	for y := 0; y < 64; y++ {
-		for x := 0; x < 64; x++ {
-			img.Set(x, y, color.RGBA{0, 0, 0, 255})
-		}
+	drawer := &Drawer{
+		client: http_client.New(),
+		img:    image.NewRGBA(image.Rect(0, 0, 64, 64)),
+		cache: NewCache("cache", 1*time.Hour, func(url string) string {
+			parts := strings.Split(url, "/")
+			return parts[len(parts)-1]
+		}),
 	}
+	drawer.Reset()
 
-	return &Drawer{
-		img: img,
+	return drawer
+}
+
+func (d *Drawer) Reset() {
+	for y := 0; y < d.img.Rect.Size().Y; y++ {
+		for x := 0; x < d.img.Rect.Size().X; x++ {
+			d.img.Set(x, y, color.RGBA{0, 0, 0, 255})
+		}
 	}
 }
 
@@ -63,13 +78,12 @@ func (d *Drawer) DrawPNGFromFile(filename string, x int, y int, targetSize int) 
 }
 
 func (d *Drawer) DrawSVGFromURL(url string, x int, y int, targetSize int) error {
-	response, err := http.Get(url)
+	data, err := d.getCachedSvg(url)
 	if err != nil {
-		return fmt.Errorf("failed to get SVG from URL: %w", err)
+		return fmt.Errorf("failed to get cached SVG: %w", err)
 	}
-	defer response.Body.Close()
 
-	svg, err := oksvg.ReadIconStream(response.Body)
+	svg, err := oksvg.ReadIconStream(bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("failed to parse SVG from URL: %w", err)
 	}
@@ -85,6 +99,28 @@ func (d *Drawer) DrawSVGFromURL(url string, x int, y int, targetSize int) error 
 	draw.Draw(d.Image(), d.Image().Bounds(), targetImage, image.Point{X: x * -1, Y: y * -1}, draw.Over)
 
 	return nil
+}
+
+func (d *Drawer) getCachedSvg(url string) ([]byte, error) {
+	data, err := d.cache.Get(url)
+	if err == nil {
+		return data, nil
+	}
+	if !errors.Is(err, ErrCacheExpired) {
+		return nil, fmt.Errorf("failed to get SVG from cache: %w", err)
+	}
+
+	var response []byte
+	err = d.client.Get(url, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get SVG from URL: %w", err)
+	}
+	err = d.cache.Set(url, response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set SVG in cache: %w", err)
+	}
+
+	return response, nil
 }
 
 func (d *Drawer) DrawRect(x int, y int, width int, height int, color color.Color) {

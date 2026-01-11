@@ -16,6 +16,8 @@ const (
 	YandexDataName   = "yandex_data"
 	MagneticDataName = "magnetic_data"
 	EventsDataName   = "events_data"
+
+	collectInterval = 5 * time.Minute
 )
 
 type Collector struct {
@@ -59,7 +61,7 @@ func (c metaItem) isExpired() bool {
 }
 
 func New() *Collector {
-	return &Collector{
+	collector := &Collector{
 		collectedData: &CollectedData{},
 		meta: map[string]metaItem{
 			YandexDataName: {
@@ -79,6 +81,9 @@ func New() *Collector {
 		xras:          integrations.NewXras(),
 		events:        integrations.NewEvents(),
 	}
+	collector.collect()
+
+	return collector
 }
 
 func (c *Collector) Start() {
@@ -86,7 +91,7 @@ func (c *Collector) Start() {
 		for {
 			c.collect()
 
-			time.Sleep(5 * time.Second)
+			time.Sleep(collectInterval)
 		}
 	}()
 }

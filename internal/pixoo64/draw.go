@@ -2,40 +2,28 @@ package pixoo64
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"image"
 
 	"github.com/AndreiBerezin/pixoo64/internal/frame"
 )
 
-func ResetHttpGifId(client *Client) error {
+func (p *Pixoo64) ResetHttpGifId() error {
 	data := map[string]any{
 		"Command": "Draw/ResetHttpGifId",
 	}
 
-	_, err := client.Post(data)
-	if err != nil {
-		return err
-	}
-	return err
+	return p.callApi(data)
 }
 
-type GetHttpGifIdResponse struct {
-	ErrorCode int `json:"error_code"`
-	PicID     int `json:"PicId"`
-}
-
-func GetHttpGifId(client *Client) (int, error) {
+func (p *Pixoo64) GetHttpGifId() (int, error) {
 	data := map[string]any{
 		"Command": "Draw/GetHttpGifId",
 	}
-	body, err := client.Post(data)
-	if err != nil {
-		return 0, err
+	var result struct {
+		ErrorCode int `json:"error_code"`
+		PicID     int `json:"PicId"`
 	}
-
-	result := GetHttpGifIdResponse{}
-	err = json.Unmarshal([]byte(body), &result)
+	err := p.callApiWithResponse(data, &result)
 	if err != nil {
 		return 0, err
 	}
@@ -43,7 +31,7 @@ func GetHttpGifId(client *Client) (int, error) {
 	return result.PicID, nil
 }
 
-func SendHttpGif(client *Client, httpGifID int, frames []frame.Frame) error {
+func (p *Pixoo64) SendHttpGif(httpGifID int, frames []frame.Frame) error {
 	for i, f := range frames {
 		data := map[string]any{
 			"Command":   "Draw/SendHttpGif",
@@ -54,8 +42,7 @@ func SendHttpGif(client *Client, httpGifID int, frames []frame.Frame) error {
 			"PicSpeed":  f.Speed(),
 			"PicData":   base64.StdEncoding.EncodeToString(f.ToBytes()),
 		}
-		_, err := client.Post(data)
-		if err != nil {
+		if err := p.callApi(data); err != nil {
 			return err
 		}
 	}
@@ -63,7 +50,7 @@ func SendHttpGif(client *Client, httpGifID int, frames []frame.Frame) error {
 	return nil
 }
 
-func SendHttpText(client *Client, textID int, text string, point image.Point, colorHex string, font int) error {
+func (p *Pixoo64) SendHttpText(textID int, text string, point image.Point, colorHex string, font int) error {
 	data := map[string]any{
 		"Command":    "Draw/SendHttpText",
 		"LcdId":      0,
@@ -79,9 +66,5 @@ func SendHttpText(client *Client, textID int, text string, point image.Point, co
 		"align":      1,
 	}
 
-	_, err := client.Post(data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return p.callApi(data)
 }

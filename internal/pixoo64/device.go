@@ -1,11 +1,6 @@
 package pixoo64
 
-const (
-	DeviceWidth  = 64
-	DeviceHeight = 64
-)
-
-func PlayBuzzer(client *Client, activeTimeInCycle int, offTimeInCycle int, playTotalTime int) error {
+func (p *Pixoo64) PlayBuzzer(activeTimeInCycle int, offTimeInCycle int, playTotalTime int) error {
 	data := map[string]any{
 		"Command":           "Device/PlayBuzzer",
 		"ActiveTimeInCycle": activeTimeInCycle,
@@ -13,9 +8,5 @@ func PlayBuzzer(client *Client, activeTimeInCycle int, offTimeInCycle int, playT
 		"PlayTotalTime":     playTotalTime,
 	}
 
-	_, err := client.Post(data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return p.callApi(data)
 }

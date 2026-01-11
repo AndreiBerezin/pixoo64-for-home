@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
 	"github.com/AndreiBerezin/pixoo64/internal/screens"
@@ -26,8 +25,6 @@ func main() {
 
 	collector := collector.New()
 	collector.Start()
-
-	time.Sleep(2 * time.Second)
 
 	state := screens.NewState(collector)
 	state.Start()

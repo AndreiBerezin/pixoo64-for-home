@@ -12,8 +12,8 @@ type ExtraWeatherScreen struct {
 	drawer *drawer.Drawer
 }
 
-func NewExtraWeatherScreen(drawer *drawer.Drawer) (*ExtraWeatherScreen, error) {
-	return &ExtraWeatherScreen{drawer: drawer}, nil
+func NewExtraWeatherScreen(drawer *drawer.Drawer) *ExtraWeatherScreen {
+	return &ExtraWeatherScreen{drawer: drawer}
 }
 
 func (s *ExtraWeatherScreen) DrawTodayStatic(data *types.YandexData) error {
