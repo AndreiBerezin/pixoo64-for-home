@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"fmt"
 	"image/png"
 	"os"
 	"time"
@@ -18,103 +19,119 @@ const (
 	BottomScreenExtraWeather = 0
 	BottomScreenMagneticSun  = 1
 
-	drawInterval = 1 * time.Minute
+	drawInterval  = 1 * time.Minute
+	errorInterval = 5 * time.Minute
 )
 
 type State struct {
 	collector           *collector.Collector
 	currentBottomScreen int
+
+	drawer             *drawer.Drawer
+	weatherScreen      *CurrentWeatherScreen
+	extraWeatherScreen *ExtraWeatherScreen
+	magneticSunScreen  *MagneticSunScreen
 }
 
 func NewState(collector *collector.Collector) *State {
+	draw := drawer.New()
+
 	return &State{
 		collector:           collector,
 		currentBottomScreen: BottomScreenExtraWeather,
+		drawer:              draw,
+		weatherScreen:       NewCurrentWeatherScreen(draw),
+		extraWeatherScreen:  NewExtraWeatherScreen(draw),
+		magneticSunScreen:   NewMagneticSunScreen(draw),
 	}
 }
 
 func (s *State) Start() {
-	drawer := drawer.NewDrawer()
-	weatherScreen := NewCurrentWeatherScreen(drawer)
-	extraWeatherScreen := NewExtraWeatherScreen(drawer)
-	magneticSunScreen := NewMagneticSunScreen(drawer)
-
 	go func() {
 		for {
-			data, err := s.collector.GetCollectedData()
-			if err != nil {
-				log.Fatal("failed to get collected data: ", zap.Error(err))
+			if err := s.draw(); err != nil {
+				log.Error("failed to draw screen: ", zap.Error(err))
+				time.Sleep(errorInterval)
+				continue
 			}
 
-			drawer.Reset()
-
-			err = weatherScreen.DrawStatic(data.YandexData)
-			if err != nil {
-				log.Fatal("failed to draw weather screen: ", zap.Error(err))
-			}
-
-			switch s.currentBottomScreen {
-			case BottomScreenExtraWeather:
-				err = extraWeatherScreen.DrawTodayStatic(data.YandexData)
-				if err != nil {
-					log.Fatal("failed to draw extra weather screen: ", zap.Error(err))
-				}
-
-				s.currentBottomScreen = BottomScreenMagneticSun
-			case BottomScreenMagneticSun:
-				err = magneticSunScreen.DrawStatic(data.MagneticData, data.YandexData)
-				if err != nil {
-					log.Fatal("failed to draw magnetic screen: ", zap.Error(err))
-				}
-
-				s.currentBottomScreen = BottomScreenExtraWeather
-			}
-
-			if env.IsDebug() {
-				devImgDraw(drawer)
-			}
-			pixoo64Draw(drawer)
-
-			log.Debug("data draw finished")
 			time.Sleep(drawInterval)
 		}
 	}()
 }
 
-func devImgDraw(drawer *drawer.Drawer) {
+func (s *State) draw() error {
+	data, err := s.collector.GetCollectedData()
+	if err != nil {
+		return fmt.Errorf("failed to get collected data: %w", err)
+	}
+
+	s.drawer.Reset()
+
+	if err = s.weatherScreen.DrawStatic(data.YandexData); err != nil {
+		return fmt.Errorf("failed to draw weather screen: %w", err)
+	}
+
+	switch s.currentBottomScreen {
+	case BottomScreenExtraWeather:
+		if err = s.extraWeatherScreen.DrawTodayStatic(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw extra weather screen: %w", err)
+		}
+
+		s.currentBottomScreen = BottomScreenMagneticSun
+	case BottomScreenMagneticSun:
+		if err = s.magneticSunScreen.DrawStatic(data.MagneticData, data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw magnetic sun screen: %w", err)
+		}
+
+		s.currentBottomScreen = BottomScreenExtraWeather
+	}
+
+	if env.IsDebug() {
+		if err = devImgDraw(s.drawer); err != nil {
+			return fmt.Errorf("failed to draw dev image: %w", err)
+		}
+	}
+	if err = pixoo64Draw(s.drawer); err != nil {
+		return fmt.Errorf("failed to draw pixoo64: %w", err)
+	}
+
+	log.Debug("data draw finished")
+
+	return nil
+}
+
+func devImgDraw(drawer *drawer.Drawer) error {
 	filename := "dev_img.png"
 	file, err := os.Create(filename)
 	if err != nil {
-		log.Fatal("failed to create file: ", zap.Error(err))
+		return fmt.Errorf("failed to create file: %w", err)
 	}
 	defer file.Close()
 
 	png.Encode(file, drawer.Image())
 
 	log.Debug("success draw dev image to " + filename)
+
+	return nil
 }
 
-func pixoo64Draw(drawer *drawer.Drawer) {
+func pixoo64Draw(drawer *drawer.Drawer) error {
 	pixoo64 := pixoo64.NewPixoo64()
 
 	var frames []frame.Frame
 	frame, err := frame.NewFrameImage(drawer.Image(), 400)
 	if err != nil {
-		log.Fatal("failed to create frame: ", zap.Error(err))
+		return fmt.Errorf("failed to create frame: %w", err)
 	}
 	frames = append(frames, *frame)
 
 	pixoo64.ResetHttpGifId()
-	err = pixoo64.SendHttpGif(0, frames)
-	if err != nil {
-		log.Fatal("failed to send http gif: ", zap.Error(err))
+	if err = pixoo64.SendHttpGif(0, frames); err != nil {
+		return fmt.Errorf("failed to send http gif: %w", err)
 	}
 
-	/*time.Sleep(1 * time.Second)
-	err = pixoo64.SendHttpText(client, 0, "hello world", image.Point{X: 4, Y: 50}, "#00ff00", 0)
-	if err != nil {
-		log.Fatal("failed to send http text: ", err)
-	}*/
-
 	log.Debug("success draw on pixoo64")
+
+	return nil
 }

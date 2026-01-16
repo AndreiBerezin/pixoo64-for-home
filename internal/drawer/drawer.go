@@ -25,7 +25,7 @@ type Drawer struct {
 	cache  *Cache
 }
 
-func NewDrawer() *Drawer {
+func New() *Drawer {
 	drawer := &Drawer{
 		client: http_client.New(),
 		img:    image.NewRGBA(image.Rect(0, 0, 64, 64)),
