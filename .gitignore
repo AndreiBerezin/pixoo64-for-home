@@ -3,7 +3,7 @@
 .env*
 !.env.example
 
-cache/
+/cache
 
 dev/
 dev_img.png

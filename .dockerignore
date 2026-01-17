@@ -6,7 +6,7 @@
 .env
 .vscode
 
-cache/*
+/cache
 
 dev/
 dev_img.png
