@@ -1,4 +1,4 @@
-package drawer
+package fonts
 
 import (
 	"os"

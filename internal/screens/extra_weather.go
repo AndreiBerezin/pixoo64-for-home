@@ -5,18 +5,11 @@ import (
 	"image/color"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
-	"github.com/AndreiBerezin/pixoo64/internal/drawer"
+	"github.com/AndreiBerezin/pixoo64/internal/screens/helpers"
+	"github.com/AndreiBerezin/pixoo64/internal/screens/helpers/fonts"
 )
 
-type ExtraWeatherScreen struct {
-	drawer *drawer.Drawer
-}
-
-func NewExtraWeatherScreen(drawer *drawer.Drawer) *ExtraWeatherScreen {
-	return &ExtraWeatherScreen{drawer: drawer}
-}
-
-func (s *ExtraWeatherScreen) DrawTodayStatic(data *types.YandexData) error {
+func (s *Screens) DrawToday(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
@@ -30,19 +23,19 @@ func (s *ExtraWeatherScreen) DrawTodayStatic(data *types.YandexData) error {
 		} else if item.Temperature == 0 {
 			temperature = " " + temperature
 		}
-		s.drawer.DrawString(temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, drawer.FontMicro5Normal)
+		helpers.DrawString(s.img, temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
 
-		err := s.drawer.DrawSVGFromURL(item.Icon, 2+i*16, startY, 12)
+		err := s.drawSVGFromURL(item.Icon, 2+i*16, startY, 12)
 		if err != nil {
 			return fmt.Errorf("failed to draw icon: %w", err)
 		}
-		s.drawer.DrawString(item.Name, 6+i*16, startY+16, color.RGBA{255, 255, 255, 255}, drawer.FontTiny5Normal)
+		helpers.DrawString(s.img, item.Name, 6+i*16, startY+16, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
 	}
 
 	return nil
 }
 
-func (s *ExtraWeatherScreen) DrawTomorrowStatic(data *types.YandexData) error {
+func (s *Screens) DrawTomorrow(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
@@ -61,13 +54,13 @@ func (s *ExtraWeatherScreen) DrawTomorrowStatic(data *types.YandexData) error {
 		} else if item.temperature == 0 {
 			temperature = " " + temperature
 		}
-		s.drawer.DrawString(temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, drawer.FontMicro5Normal)
+		helpers.DrawString(s.img, temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
 
-		err := s.drawer.DrawSVGFromURL(item.icon, 2+i*16, startY, 12)
+		err := s.drawSVGFromURL(item.icon, 2+i*16, startY, 12)
 		if err != nil {
 			return fmt.Errorf("failed to draw icon: %w", err)
 		}
-		s.drawer.DrawString(item.name, 5+i*16, startY+17, color.RGBA{255, 255, 255, 255}, drawer.FontTiny5Normal)
+		helpers.DrawString(s.img, item.name, 5+i*16, startY+17, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
 	}
 
 	return nil

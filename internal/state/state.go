@@ -1,21 +1,25 @@
-package screens
+package state
 
 import (
 	"fmt"
+	"image"
 	"image/png"
 	"os"
 	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
-	"github.com/AndreiBerezin/pixoo64/internal/drawer"
-	"github.com/AndreiBerezin/pixoo64/internal/frame"
 	"github.com/AndreiBerezin/pixoo64/internal/pixoo64"
+	"github.com/AndreiBerezin/pixoo64/internal/screens"
+	"github.com/AndreiBerezin/pixoo64/internal/state/frame"
 	"github.com/AndreiBerezin/pixoo64/pkg/env"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"go.uber.org/zap"
 )
 
 const (
+	deviceWidth  = 64
+	deviceHeight = 64
+
 	BottomScreenExtraWeather = 0
 	BottomScreenMagneticSun  = 1
 
@@ -24,25 +28,19 @@ const (
 )
 
 type State struct {
+	device              *pixoo64.Pixoo64
 	collector           *collector.Collector
 	currentBottomScreen int
 
-	drawer             *drawer.Drawer
-	weatherScreen      *CurrentWeatherScreen
-	extraWeatherScreen *ExtraWeatherScreen
-	magneticSunScreen  *MagneticSunScreen
+	screens *screens.Screens
 }
 
-func NewState(collector *collector.Collector) *State {
-	draw := drawer.New()
-
+func New(collector *collector.Collector) *State {
 	return &State{
+		device:              pixoo64.New(deviceWidth, deviceHeight),
 		collector:           collector,
+		screens:             screens.New(deviceWidth, deviceHeight),
 		currentBottomScreen: BottomScreenExtraWeather,
-		drawer:              draw,
-		weatherScreen:       NewCurrentWeatherScreen(draw),
-		extraWeatherScreen:  NewExtraWeatherScreen(draw),
-		magneticSunScreen:   NewMagneticSunScreen(draw),
 	}
 }
 
@@ -61,26 +59,26 @@ func (s *State) Start() {
 }
 
 func (s *State) draw() error {
-	data, err := s.collector.GetCollectedData()
+	data, err := s.collector.CollectedData()
 	if err != nil {
 		return fmt.Errorf("failed to get collected data: %w", err)
 	}
 
-	s.drawer.Reset()
+	s.screens.Reset()
 
-	if err = s.weatherScreen.DrawStatic(data.YandexData); err != nil {
+	if err = s.screens.DrawCurrentWeather(data.YandexData); err != nil {
 		return fmt.Errorf("failed to draw weather screen: %w", err)
 	}
 
 	switch s.currentBottomScreen {
 	case BottomScreenExtraWeather:
-		if err = s.extraWeatherScreen.DrawTodayStatic(data.YandexData); err != nil {
+		if err = s.screens.DrawToday(data.YandexData); err != nil {
 			return fmt.Errorf("failed to draw extra weather screen: %w", err)
 		}
 
 		s.currentBottomScreen = BottomScreenMagneticSun
 	case BottomScreenMagneticSun:
-		if err = s.magneticSunScreen.DrawStatic(data.MagneticData, data.YandexData); err != nil {
+		if err = s.screens.DrawMagneticSun(data.MagneticData, data.YandexData); err != nil {
 			return fmt.Errorf("failed to draw magnetic sun screen: %w", err)
 		}
 
@@ -88,11 +86,11 @@ func (s *State) draw() error {
 	}
 
 	if env.IsDebug() {
-		if err = devImgDraw(s.drawer); err != nil {
+		if err = devImgDraw(s.screens.Image()); err != nil {
 			return fmt.Errorf("failed to draw dev image: %w", err)
 		}
 	}
-	if err = pixoo64Draw(s.drawer); err != nil {
+	if err = pixoo64Draw(s.screens.Image()); err != nil {
 		return fmt.Errorf("failed to draw pixoo64: %w", err)
 	}
 
@@ -101,7 +99,7 @@ func (s *State) draw() error {
 	return nil
 }
 
-func devImgDraw(drawer *drawer.Drawer) error {
+func devImgDraw(image *image.RGBA) error {
 	filename := "dev_img.png"
 	file, err := os.Create(filename)
 	if err != nil {
@@ -109,18 +107,18 @@ func devImgDraw(drawer *drawer.Drawer) error {
 	}
 	defer file.Close()
 
-	png.Encode(file, drawer.Image())
+	png.Encode(file, image)
 
 	log.Debug("success draw dev image to " + filename)
 
 	return nil
 }
 
-func pixoo64Draw(drawer *drawer.Drawer) error {
-	pixoo64 := pixoo64.NewPixoo64()
+func pixoo64Draw(image *image.RGBA) error {
+	pixoo64 := pixoo64.New(deviceWidth, deviceHeight)
 
 	var frames []frame.Frame
-	frame, err := frame.NewFrameImage(drawer.Image(), 400)
+	frame, err := frame.NewFrameImage(image, 400)
 	if err != nil {
 		return fmt.Errorf("failed to create frame: %w", err)
 	}

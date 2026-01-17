@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"image"
 
-	"github.com/AndreiBerezin/pixoo64/internal/frame"
+	"github.com/AndreiBerezin/pixoo64/internal/state/frame"
 )
 
 func (p *Pixoo64) ResetHttpGifId() error {
@@ -36,7 +36,7 @@ func (p *Pixoo64) SendHttpGif(httpGifID int, frames []frame.Frame) error {
 		data := map[string]any{
 			"Command":   "Draw/SendHttpGif",
 			"PicNum":    len(frames),
-			"PicWidth":  DeviceWidth,
+			"PicWidth":  p.width,
 			"PicOffset": i,
 			"PicID":     httpGifID,
 			"PicSpeed":  f.Speed(),

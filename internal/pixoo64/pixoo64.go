@@ -7,20 +7,19 @@ import (
 	"github.com/AndreiBerezin/pixoo64/pkg/http_client"
 )
 
-const (
-	DeviceWidth  = 64
-	DeviceHeight = 64
-)
-
 type Pixoo64 struct {
 	client *http_client.Client
 	addr   string
+	width  int
+	height int
 }
 
-func NewPixoo64() *Pixoo64 {
+func New(width int, height int) *Pixoo64 {
 	return &Pixoo64{
 		client: http_client.New(),
 		addr:   fmt.Sprintf("http://%s/post", os.Getenv("PIXOO_ADDRESS")),
+		width:  width,
+		height: height,
 	}
 }
 

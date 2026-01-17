@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
-	"github.com/AndreiBerezin/pixoo64/internal/screens"
+	"github.com/AndreiBerezin/pixoo64/internal/state"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"github.com/joho/godotenv"
 )
@@ -26,7 +26,7 @@ func main() {
 	collector := collector.New()
 	collector.Start()
 
-	state := screens.NewState(collector)
+	state := state.New(collector)
 	state.Start()
 
 	waitShutdownSignal()
