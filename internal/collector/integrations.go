@@ -15,11 +15,14 @@ type Integration struct {
 	collectFunc func(collectedData *types.CollectedData)
 }
 
-func (i *Integration) IsExpired() bool {
+func (i *Integration) isExpired() bool {
 	return time.Since(i.collectedAt) > i.ttl
 }
 
 func (i *Integration) Collect(collectedData *types.CollectedData) {
+	if !i.isExpired() {
+		return
+	}
 	i.collectedAt = time.Now()
 	i.collectFunc(collectedData)
 }

@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
+	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/pixoo64"
 	"github.com/AndreiBerezin/pixoo64/internal/screens"
-	"github.com/AndreiBerezin/pixoo64/internal/state/frame"
 	"github.com/AndreiBerezin/pixoo64/pkg/env"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"go.uber.org/zap"
@@ -70,19 +70,17 @@ func (s *State) draw() error {
 		return fmt.Errorf("failed to draw weather screen: %w", err)
 	}
 
-	switch s.currentBottomScreen {
-	case BottomScreenExtraWeather:
-		if err = s.screens.DrawToday(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw extra weather screen: %w", err)
+	// todo: сделать красиво
+	// todo: вылезает за границы
+	now := time.Now()
+	if now.Hour() == 8 && now.Minute() >= 20 && now.Minute() <= 40 {
+		if err = s.drawTimerState(); err != nil {
+			return fmt.Errorf("failed to draw timer screen: %w", err)
 		}
-
-		s.currentBottomScreen = BottomScreenMagneticSun
-	case BottomScreenMagneticSun:
-		if err = s.screens.DrawMagneticSun(data.MagneticData, data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw magnetic sun screen: %w", err)
+	} else {
+		if err := s.drawBottomState(data); err != nil {
+			return fmt.Errorf("failed to draw bottom state: %w", err)
 		}
-
-		s.currentBottomScreen = BottomScreenExtraWeather
 	}
 
 	if env.IsDebug() {
@@ -90,11 +88,48 @@ func (s *State) draw() error {
 			return fmt.Errorf("failed to draw dev image: %w", err)
 		}
 	}
-	if err = pixoo64Draw(s.screens.Image()); err != nil {
+
+	if err = s.device.DrawImage(s.screens.Image()); err != nil {
 		return fmt.Errorf("failed to draw pixoo64: %w", err)
 	}
 
 	log.Debug("data draw finished")
+
+	return nil
+}
+
+func (s *State) drawBottomState(data *types.CollectedData) error {
+	switch s.currentBottomScreen {
+	case BottomScreenExtraWeather:
+		if err := s.screens.DrawToday(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw extra weather screen: %w", err)
+		}
+
+		s.currentBottomScreen = BottomScreenMagneticSun
+	case BottomScreenMagneticSun:
+		if err := s.screens.DrawMagneticSun(data.MagneticData, data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw magnetic sun screen: %w", err)
+		}
+
+		s.currentBottomScreen = BottomScreenExtraWeather
+	}
+
+	return nil
+}
+
+func (s *State) drawTimerState() error {
+	now := time.Now()
+	from := time.Date(now.Year(), now.Month(), now.Day(), 8, 20, 0, 0, now.Location())
+	to := time.Date(now.Year(), now.Month(), now.Day(), 8, 40, 0, 0, now.Location())
+	if err := s.screens.DrawTimer(from, to); err != nil {
+		return fmt.Errorf("failed to draw timer screen: %w", err)
+	}
+
+	if now.Minute() == 40 {
+		s.device.PlayBuzzer(100, 100, 500)
+	} else {
+		s.device.PlayBuzzer(100, 0, 100)
+	}
 
 	return nil
 }
@@ -110,26 +145,6 @@ func devImgDraw(image *image.RGBA) error {
 	png.Encode(file, image)
 
 	log.Debug("success draw dev image to " + filename)
-
-	return nil
-}
-
-func pixoo64Draw(image *image.RGBA) error {
-	pixoo64 := pixoo64.New(deviceWidth, deviceHeight)
-
-	var frames []frame.Frame
-	frame, err := frame.NewFrameImage(image, 400)
-	if err != nil {
-		return fmt.Errorf("failed to create frame: %w", err)
-	}
-	frames = append(frames, *frame)
-
-	pixoo64.ResetHttpGifId()
-	if err = pixoo64.SendHttpGif(0, frames); err != nil {
-		return fmt.Errorf("failed to send http gif: %w", err)
-	}
-
-	log.Debug("success draw on pixoo64")
 
 	return nil
 }

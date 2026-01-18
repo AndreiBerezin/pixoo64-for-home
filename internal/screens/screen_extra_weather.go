@@ -5,8 +5,7 @@ import (
 	"image/color"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
-	"github.com/AndreiBerezin/pixoo64/internal/screens/helpers"
-	"github.com/AndreiBerezin/pixoo64/internal/screens/helpers/fonts"
+	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
 )
 
 func (s *Screens) DrawToday(data *types.YandexData) error {
@@ -23,13 +22,13 @@ func (s *Screens) DrawToday(data *types.YandexData) error {
 		} else if item.Temperature == 0 {
 			temperature = " " + temperature
 		}
-		helpers.DrawString(s.img, temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
+		s.image.DrawString(temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
 
-		err := s.drawSVGFromURL(item.Icon, 2+i*16, startY, 12)
+		err := s.image.DrawSVGFromURL(item.Icon, 2+i*16, startY, 12)
 		if err != nil {
 			return fmt.Errorf("failed to draw icon: %w", err)
 		}
-		helpers.DrawString(s.img, item.Name, 6+i*16, startY+16, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
+		s.image.DrawString(item.Name, 6+i*16, startY+16, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
 	}
 
 	return nil
@@ -54,13 +53,13 @@ func (s *Screens) DrawTomorrow(data *types.YandexData) error {
 		} else if item.temperature == 0 {
 			temperature = " " + temperature
 		}
-		helpers.DrawString(s.img, temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
+		s.image.DrawString(temperature, 2+i*16, startY, color.RGBA{255, 255, 255, 255}, fonts.FontMicro5Normal)
 
-		err := s.drawSVGFromURL(item.icon, 2+i*16, startY, 12)
+		err := s.image.DrawSVGFromURL(item.icon, 2+i*16, startY, 12)
 		if err != nil {
 			return fmt.Errorf("failed to draw icon: %w", err)
 		}
-		helpers.DrawString(s.img, item.name, 5+i*16, startY+17, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
+		s.image.DrawString(item.name, 5+i*16, startY+17, color.RGBA{255, 255, 255, 255}, fonts.FontTiny5Normal)
 	}
 
 	return nil

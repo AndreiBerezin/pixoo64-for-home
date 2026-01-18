@@ -47,9 +47,6 @@ func (c *Collector) collect() {
 	defer c.Unlock()
 
 	for _, integration := range c.integrations {
-		if !integration.IsExpired() {
-			continue
-		}
 		integration.Collect(c.collectedData)
 	}
 }

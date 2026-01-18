@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"image"
 
-	"github.com/AndreiBerezin/pixoo64/internal/state/frame"
+	"github.com/AndreiBerezin/pixoo64/internal/pixoo64/frame"
 )
 
 func (p *Pixoo64) ResetHttpGifId() error {

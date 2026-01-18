@@ -2,8 +2,10 @@ package pixoo64
 
 import (
 	"fmt"
+	"image"
 	"os"
 
+	"github.com/AndreiBerezin/pixoo64/internal/pixoo64/frame"
 	"github.com/AndreiBerezin/pixoo64/pkg/http_client"
 )
 
@@ -29,4 +31,15 @@ func (p *Pixoo64) callApi(bodyObject any) error {
 
 func (p *Pixoo64) callApiWithResponse(bodyObject any, target any) error {
 	return p.client.Post(p.addr, bodyObject, target)
+}
+
+func (p *Pixoo64) DrawImage(image *image.RGBA) error {
+	frames := []frame.Frame{frame.New(image, 400)}
+
+	p.ResetHttpGifId()
+	if err := p.SendHttpGif(0, frames); err != nil {
+		return fmt.Errorf("failed to send http gif: %w", err)
+	}
+
+	return nil
 }
