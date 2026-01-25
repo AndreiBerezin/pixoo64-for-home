@@ -2,7 +2,7 @@ package types
 
 type YandexData struct {
 	CurrentWeather YandexCurrentWeather
-	DayWeather     YandexDayWeather
+	ByDays         []YandexDayWeather
 	Sun            YandexSun
 	Moon           YandexMoon
 }
@@ -16,11 +16,13 @@ type YandexCurrentWeather struct {
 }
 
 type YandexDayWeather struct {
-	Items []YandexDayItem
+	Morning YandexDayItem
+	Day     YandexDayItem
+	Evening YandexDayItem
+	Night   YandexDayItem
 }
 
 type YandexDayItem struct {
-	Name        string
 	Icon        string
 	Temperature int
 }

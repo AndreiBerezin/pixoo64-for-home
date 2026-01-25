@@ -73,9 +73,15 @@ func (s *State) draw() error {
 	// todo: сделать красиво
 	// todo: вылезает за границы
 	now := time.Now()
-	if now.Hour() == 8 && now.Minute() >= 20 && now.Minute() <= 40 {
-		if err = s.drawTimerState(); err != nil {
-			return fmt.Errorf("failed to draw timer screen: %w", err)
+	if now.Weekday() != time.Sunday && now.Weekday() != time.Saturday && now.Hour() == 8 && now.Minute() >= 20 && now.Minute() <= 40 {
+		if now.Minute()%3 == 0 {
+			if err := s.screens.DrawExtraWeater(data.YandexData); err != nil {
+				return fmt.Errorf("failed to draw extra weather screen: %w", err)
+			}
+		} else {
+			if err = s.drawTimerState(); err != nil {
+				return fmt.Errorf("failed to draw timer screen: %w", err)
+			}
 		}
 	} else {
 		if err := s.drawBottomState(data); err != nil {
@@ -101,7 +107,7 @@ func (s *State) draw() error {
 func (s *State) drawBottomState(data *types.CollectedData) error {
 	switch s.currentBottomScreen {
 	case BottomScreenExtraWeather:
-		if err := s.screens.DrawToday(data.YandexData); err != nil {
+		if err := s.screens.DrawExtraWeater(data.YandexData); err != nil {
 			return fmt.Errorf("failed to draw extra weather screen: %w", err)
 		}
 
@@ -125,7 +131,7 @@ func (s *State) drawTimerState() error {
 		return fmt.Errorf("failed to draw timer screen: %w", err)
 	}
 
-	if now.Minute() == 40 {
+	if now.Minute() == 20 || now.Minute() == 40 {
 		s.device.PlayBuzzer(100, 100, 500)
 	} else {
 		s.device.PlayBuzzer(100, 0, 100)

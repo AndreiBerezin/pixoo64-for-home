@@ -34,6 +34,28 @@ func (y *YandexWeather) Data() (*types.YandexData, error) {
 
 	todayData := response.Forecasts[0]
 
+	var byDays []types.YandexDayWeather
+	for _, forecast := range response.Forecasts {
+		byDays = append(byDays, types.YandexDayWeather{
+			Morning: types.YandexDayItem{
+				Icon:        forecast.Parts["morning"].Icon.GetUrl(),
+				Temperature: int(forecast.Parts["morning"].TempAverage),
+			},
+			Day: types.YandexDayItem{
+				Icon:        forecast.Parts["day"].Icon.GetUrl(),
+				Temperature: int(forecast.Parts["day"].TempAverage),
+			},
+			Evening: types.YandexDayItem{
+				Icon:        forecast.Parts["evening"].Icon.GetUrl(),
+				Temperature: int(forecast.Parts["evening"].TempAverage),
+			},
+			Night: types.YandexDayItem{
+				Icon:        forecast.Parts["night"].Icon.GetUrl(),
+				Temperature: int(forecast.Parts["night"].TempAverage),
+			},
+		})
+	}
+
 	return &types.YandexData{
 		CurrentWeather: types.YandexCurrentWeather{
 			Temperature:          int(response.Fact.Temperature),
@@ -42,30 +64,7 @@ func (y *YandexWeather) Data() (*types.YandexData, error) {
 			WindSpeed:            int(response.Fact.WindSpeed),
 			WindDirection:        response.Fact.WindDirection,
 		},
-		DayWeather: types.YandexDayWeather{
-			Items: []types.YandexDayItem{
-				{
-					Name:        "у",
-					Icon:        todayData.Parts["morning"].Icon.GetUrl(),
-					Temperature: int(todayData.Parts["morning"].TempAverage),
-				},
-				{
-					Name:        "д",
-					Icon:        todayData.Parts["day"].Icon.GetUrl(),
-					Temperature: int(todayData.Parts["day"].TempAverage),
-				},
-				{
-					Name:        "в",
-					Icon:        todayData.Parts["evening"].Icon.GetUrl(),
-					Temperature: int(todayData.Parts["evening"].TempAverage),
-				},
-				{
-					Name:        "н",
-					Icon:        todayData.Parts["night"].Icon.GetUrl(),
-					Temperature: int(todayData.Parts["night"].TempAverage),
-				},
-			},
-		},
+		ByDays: byDays,
 		Sun: types.YandexSun{
 			SunriseTime: todayData.Sunrise,
 			SunsetTime:  todayData.Sunset,
