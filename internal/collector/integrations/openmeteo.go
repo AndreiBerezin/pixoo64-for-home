@@ -59,7 +59,11 @@ func (o *OpenMeteo) Data() (*types.PressureData, error) {
 	var now = time.Now()
 	for i := 0; i < 3; i++ {
 		date := now.AddDate(0, 0, i)
-		dayHours := hoursByDay[date.Format("2006-01-02")]
+		dateStr := date.Format("2006-01-02")
+		if _, ok := hoursByDay[dateStr]; !ok {
+			return nil, fmt.Errorf("no pressure data for day: %s", dateStr)
+		}
+		dayHours := hoursByDay[dateStr]
 
 		days = append(days, types.PressureDay{
 			Day:   date.Format("02"),
@@ -94,7 +98,7 @@ func (o *OpenMeteo) mockResponse() (*openMeteoResponse, error) {
 }
 
 func (o *OpenMeteo) callApi() (*openMeteoResponse, error) {
-	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=surface_pressure&forecast_days=3",
+	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=surface_pressure&forecast_days=3&timezone=auto",
 		os.Getenv("LAT"), os.Getenv("LON"),
 	)
 

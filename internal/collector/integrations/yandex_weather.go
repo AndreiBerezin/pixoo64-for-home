@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/pkg/env"
@@ -69,11 +71,27 @@ func (y *YandexWeather) Data() (*types.YandexData, error) {
 			SunriseTime: todayData.Sunrise,
 			SunsetTime:  todayData.Sunset,
 		},
-		Moon: types.YandexMoon{ // todo: вытащить откуда нибудь
-			MoonPhase: "",
-			MoonDay:   1,
+		Moon: types.YandexMoon{
+			Icon:        todayData.MoonCode.GetIcon(),
+			NewMoonDate: y.getNewMoonDate().Format("02.01"),
 		},
 	}, nil
+}
+
+func (y *YandexWeather) getNewMoonDate() time.Time {
+	synodicMonthDays := 29.530588853
+	referenceNewMoonUTC := time.Date(2000, 1, 6, 18, 14, 0, 0, time.UTC)
+
+	now := time.Now()
+
+	period := time.Duration(math.Round(synodicMonthDays * 24 * 60 * 60 * float64(time.Second)))
+
+	elapsed := now.In(time.UTC).Sub(referenceNewMoonUTC)
+	n := int64(math.Floor(float64(elapsed)/float64(period))) + 1
+
+	nextNewUTC := referenceNewMoonUTC.Add(time.Duration(n) * period)
+
+	return nextNewUTC.In(now.Location())
 }
 
 func (y *YandexWeather) mockResponse() (*yandexWeatherResponse, error) {
@@ -141,7 +159,7 @@ type fact struct {
 type forecast struct {
 	Sunrise  string          `json:"sunrise"`
 	Sunset   string          `json:"sunset"`
-	MoonCode int             `json:"moon_code"`
+	MoonCode moonCode        `json:"moon_code"`
 	Parts    map[string]part `json:"parts"`
 }
 
@@ -154,4 +172,28 @@ type Icon string
 
 func (i Icon) GetUrl() string {
 	return fmt.Sprintf("https://yastatic.net/weather/i/icons/funky/dark/%s.svg", string(i))
+}
+
+type moonCode int
+
+func (m moonCode) GetIcon() string {
+	if m == 0 { // полнолуние
+		return "static/images/moon_0.svg"
+	} else if m >= 1 && m <= 3 { // убывающая Луна
+		return "static/images/moon_1-3.svg"
+	} else if m == 4 { // последняя четверть
+		return "static/images/moon_4.svg"
+	} else if m >= 5 && m <= 7 { // убывающая Луна
+		return "static/images/moon_5-7.svg"
+	} else if m == 8 { // новолуние
+		return "static/images/moon_8.svg"
+	} else if m >= 9 && m <= 11 { // растущая Луна
+		return "static/images/moon_9-11.svg"
+	} else if m == 12 { // первая четверть
+		return "static/images/moon_12.svg"
+	} else if m >= 13 && m <= 15 { // растущая Луна
+		return "static/images/moon_13-15.svg"
+	}
+
+	return ""
 }
