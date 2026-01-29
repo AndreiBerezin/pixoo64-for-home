@@ -71,3 +71,18 @@ func NewEventsIntegration(ttl time.Duration) *Integration {
 		},
 	}
 }
+
+func NewPressureIntegration(ttl time.Duration) *Integration {
+	return &Integration{
+		ttl: ttl,
+		collectFunc: func(collectedData *types.CollectedData) {
+			integration := integrations.NewOpenMeteo()
+			pressureData, err := integration.Data()
+			if err != nil {
+				log.Error("failed to get pressure data: ", zap.Error(err))
+				return
+			}
+			collectedData.PressureData = pressureData
+		},
+	}
+}

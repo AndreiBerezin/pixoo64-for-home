@@ -1,7 +1,7 @@
 # pixoo64-for-home
 Divoom pixoo64 display for home usage
 
-
+**screenshots**
 <img src="static/readme/example.png" alt="example" width="448"/>
 
 
@@ -16,3 +16,6 @@ docker run -d \
   -e YANDEX_WEATHER_LON="37.618" \
   ghcr.io/andreiberezin/pixoo64-for-home:latest
 ```
+
+**divoom docs**
+http://doc.divoom-gz.com/web/#/12?page_id=195

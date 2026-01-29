@@ -9,6 +9,7 @@ type CollectedData struct {
 	YandexData   *YandexData
 	MagneticData *MagneticData
 	EventsData   *EventsData
+	PressureData *PressureData
 }
 
 func (c *CollectedData) Clone() (*CollectedData, error) {

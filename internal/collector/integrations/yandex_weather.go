@@ -98,7 +98,7 @@ func (y *YandexWeather) mockResponse() (*yandexWeatherResponse, error) {
 }
 
 func (y *YandexWeather) callApi() (*yandexWeatherResponse, error) {
-	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=%s&lon=%s", os.Getenv("YANDEX_WEATHER_LAT"), os.Getenv("YANDEX_WEATHER_LON"))
+	url := fmt.Sprintf("https://api.weather.yandex.ru/v2/forecast?lat=%s&lon=%s", os.Getenv("LAT"), os.Getenv("LON"))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

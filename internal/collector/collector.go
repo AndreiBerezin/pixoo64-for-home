@@ -25,6 +25,7 @@ func New() *Collector {
 			NewYandexIntegration(1 * time.Hour),
 			NewMagneticIntegration(1 * time.Hour),
 			NewEventsIntegration(1 * time.Hour),
+			NewPressureIntegration(1 * time.Hour),
 		},
 	}
 	collector.collect()
