@@ -72,26 +72,22 @@ func (y *YandexWeather) Data() (*types.YandexData, error) {
 			SunsetTime:  todayData.Sunset,
 		},
 		Moon: types.YandexMoon{
-			Icon:        todayData.MoonCode.GetIcon(),
-			NewMoonDate: y.getNewMoonDate().Format("02.01"),
+			Icon:         todayData.MoonCode.GetIcon(),
+			MoonPhaseDay: y.getMoonPhaseDay(),
 		},
 	}, nil
 }
 
-func (y *YandexWeather) getNewMoonDate() time.Time {
+func (y *YandexWeather) getMoonPhaseDay() int {
 	synodicMonthDays := 29.530588853
 	referenceNewMoonUTC := time.Date(2000, 1, 6, 18, 14, 0, 0, time.UTC)
 
-	now := time.Now()
+	now := time.Now().UTC()
+	elapsed := now.Sub(referenceNewMoonUTC)
+	daysSinceReference := elapsed.Hours() / 24
+	moonAge := math.Mod(daysSinceReference, synodicMonthDays)
 
-	period := time.Duration(math.Round(synodicMonthDays * 24 * 60 * 60 * float64(time.Second)))
-
-	elapsed := now.In(time.UTC).Sub(referenceNewMoonUTC)
-	n := int64(math.Floor(float64(elapsed)/float64(period))) + 1
-
-	nextNewUTC := referenceNewMoonUTC.Add(time.Duration(n) * period)
-
-	return nextNewUTC.In(now.Location())
+	return int(math.Round(moonAge))
 }
 
 func (y *YandexWeather) mockResponse() (*yandexWeatherResponse, error) {

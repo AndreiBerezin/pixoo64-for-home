@@ -76,6 +76,23 @@ func (i *Image) DrawPNGFromFile(filename string, x int, y int, targetSize int) e
 	return nil
 }
 
+func (i *Image) DrawSVGFromFile(filename string, x int, y int, targetSize int) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return fmt.Errorf("failed to open image: %w", err)
+	}
+	defer file.Close()
+
+	svg, err := oksvg.ReadIconStream(file)
+	if err != nil {
+		return fmt.Errorf("failed to parse SVG from bytes: %w", err)
+	}
+
+	i.drawSvg(svg, x, y, targetSize)
+
+	return nil
+}
+
 func (i *Image) DrawSVGFromURL(url string, x int, y int, targetSize int) error {
 	data, err := i.getCachedSvg(url)
 	if err != nil {
@@ -87,6 +104,12 @@ func (i *Image) DrawSVGFromURL(url string, x int, y int, targetSize int) error {
 		return fmt.Errorf("failed to parse SVG from bytes: %w", err)
 	}
 
+	i.drawSvg(svg, x, y, targetSize)
+
+	return nil
+}
+
+func (i *Image) drawSvg(svg *oksvg.SvgIcon, x int, y int, targetSize int) {
 	svg.SetTarget(0, 0, float64(targetSize), float64(targetSize))
 
 	targetImage := image.NewRGBA(image.Rect(0, 0, targetSize, targetSize))
@@ -96,8 +119,6 @@ func (i *Image) DrawSVGFromURL(url string, x int, y int, targetSize int) error {
 	svg.Draw(raster, 1.0)
 
 	draw.Draw(i.image, i.image.Bounds(), targetImage, image.Point{X: x * -1, Y: y * -1}, draw.Over)
-
-	return nil
 }
 
 func (i *Image) getCachedSvg(url string) ([]byte, error) {

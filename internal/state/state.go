@@ -20,8 +20,9 @@ const (
 	deviceWidth  = 64
 	deviceHeight = 64
 
-	BottomScreenExtraWeather = 0
-	BottomScreenMagneticSun  = 1
+	BottomScreenExtraWeather     = 0
+	BottomScreenMagneticPressure = 1
+	BottomScreenSunMoon          = 2
 
 	drawInterval  = 1 * time.Minute
 	errorInterval = 5 * time.Minute
@@ -110,13 +111,16 @@ func (s *State) drawBottomState(data *types.CollectedData) error {
 		if err := s.screens.DrawExtraWeater(data.YandexData); err != nil {
 			return fmt.Errorf("failed to draw extra weather screen: %w", err)
 		}
-
-		s.currentBottomScreen = BottomScreenMagneticSun
-	case BottomScreenMagneticSun:
-		if err := s.screens.DrawMagneticSun(data.MagneticData, data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw magnetic sun screen: %w", err)
+		s.currentBottomScreen = BottomScreenMagneticPressure
+	case BottomScreenMagneticPressure:
+		if err := s.screens.DrawMagneticPressure(data.MagneticData, data.PressureData); err != nil {
+			return fmt.Errorf("failed to draw magnetic pressure screen: %w", err)
 		}
-
+		s.currentBottomScreen = BottomScreenSunMoon
+	case BottomScreenSunMoon:
+		if err := s.screens.DrawSunMoon(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw sun moon screen: %w", err)
+		}
 		s.currentBottomScreen = BottomScreenExtraWeather
 	}
 

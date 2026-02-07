@@ -33,6 +33,6 @@ type YandexSun struct {
 }
 
 type YandexMoon struct {
-	Icon        string
-	NewMoonDate string
+	Icon         string
+	MoonPhaseDay int
 }

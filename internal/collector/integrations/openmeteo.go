@@ -36,6 +36,7 @@ func (o *OpenMeteo) Data() (*types.PressureData, error) {
 
 	collectHours := []int{0, 3, 6, 9, 12, 15, 18, 21}
 
+	var minDate time.Time
 	hoursByDay := make(map[string][]types.PressureHour)
 	for i, t := range response.Hourly.Time {
 		parsedTime, err := time.Parse("2006-01-02T15:04", t)
@@ -53,12 +54,16 @@ func (o *OpenMeteo) Data() (*types.PressureData, error) {
 			Hour:     hour,
 			Pressure: float32(response.Hourly.SurfacePressure[i]) * 0.7500638, // hPa -> mmHg
 		})
+
+		if minDate.IsZero() || parsedTime.Before(minDate) {
+			minDate = parsedTime
+		}
 	}
 
 	var days []types.PressureDay
-	var now = time.Now()
+
 	for i := 0; i < 3; i++ {
-		date := now.AddDate(0, 0, i)
+		date := minDate.AddDate(0, 0, i)
 		dateStr := date.Format("2006-01-02")
 		if _, ok := hoursByDay[dateStr]; !ok {
 			return nil, fmt.Errorf("no pressure data for day: %s", dateStr)
