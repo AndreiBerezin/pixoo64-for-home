@@ -61,7 +61,6 @@ func (o *OpenMeteo) Data() (*types.PressureData, error) {
 	}
 
 	var days []types.PressureDay
-
 	for i := 0; i < 3; i++ {
 		date := minDate.AddDate(0, 0, i)
 		dateStr := date.Format("2006-01-02")

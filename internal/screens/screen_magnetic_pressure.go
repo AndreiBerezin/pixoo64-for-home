@@ -14,7 +14,7 @@ func (s *Screens) DrawMagneticPressure(magneticData *types.MagneticData, pressur
 
 	startY := 38
 
-	s.image.DrawPNGFromFile("static/images/pressure.png", 2, startY-1, 7)
+	s.image.DrawPNGFromFile("static/images/magnet.png", 2, startY, 6)
 
 	offsetX := 13
 	for _, day := range magneticData.Days {
@@ -37,7 +37,7 @@ func (s *Screens) DrawMagneticPressure(magneticData *types.MagneticData, pressur
 		offsetX += 4
 	}
 
-	s.image.DrawPNGFromFile("static/images/magnet.png", 2, startY+18, 6)
+	s.image.DrawPNGFromFile("static/images/pressure.png", 2, startY+17, 7)
 
 	offsetX = 13
 	for _, day := range pressureData.Days {
