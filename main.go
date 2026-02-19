@@ -7,6 +7,7 @@ import (
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
 	"github.com/AndreiBerezin/pixoo64/internal/state"
+	"github.com/AndreiBerezin/pixoo64/internal/timer"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"github.com/joho/godotenv"
 )
@@ -23,10 +24,15 @@ func main() {
 
 	log.Info("app started")
 
+	timerManager, err := timer.NewManager()
+	if err != nil {
+		log.Fatal("failed to init timer manager: " + err.Error())
+	}
+
 	collector := collector.New()
 	collector.Start()
 
-	state := state.New(collector)
+	state := state.New(collector, timerManager)
 	state.Start()
 
 	waitShutdownSignal()

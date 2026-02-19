@@ -173,21 +173,22 @@ func (i Icon) GetUrl() string {
 type moonCode int
 
 func (m moonCode) GetIcon() string {
-	if m == 0 { // полнолуние
+	switch int(m) {
+	case 0: // полнолуние
 		return "static/images/moon_0.svg"
-	} else if m >= 1 && m <= 3 { // убывающая Луна
+	case 1, 2, 3: // убывающая Луна
 		return "static/images/moon_1-3.svg"
-	} else if m == 4 { // последняя четверть
+	case 4: // последняя четверть
 		return "static/images/moon_4.svg"
-	} else if m >= 5 && m <= 7 { // убывающая Луна
+	case 5, 6, 7: // убывающая Луна
 		return "static/images/moon_5-7.svg"
-	} else if m == 8 { // новолуние
+	case 8: // новолуние
 		return "static/images/moon_8.svg"
-	} else if m >= 9 && m <= 11 { // растущая Луна
+	case 9, 10, 11: // растущая Луна
 		return "static/images/moon_9-11.svg"
-	} else if m == 12 { // первая четверть
+	case 12: // первая четверть
 		return "static/images/moon_12.svg"
-	} else if m >= 13 && m <= 15 { // растущая Луна
+	case 13, 14, 15: // растущая Луна
 		return "static/images/moon_13-15.svg"
 	}
 

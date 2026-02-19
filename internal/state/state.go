@@ -11,6 +11,7 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/pixoo64"
 	"github.com/AndreiBerezin/pixoo64/internal/screens"
+	"github.com/AndreiBerezin/pixoo64/internal/timer"
 	"github.com/AndreiBerezin/pixoo64/pkg/env"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"go.uber.org/zap"
@@ -32,16 +33,17 @@ type State struct {
 	device              *pixoo64.Pixoo64
 	collector           *collector.Collector
 	currentBottomScreen int
-
-	screens *screens.Screens
+	screens             *screens.Screens
+	timerManager        *timer.Manager
 }
 
-func New(collector *collector.Collector) *State {
+func New(collector *collector.Collector, timerManager *timer.Manager) *State {
 	return &State{
 		device:              pixoo64.New(deviceWidth, deviceHeight),
 		collector:           collector,
 		screens:             screens.New(deviceWidth, deviceHeight),
 		currentBottomScreen: BottomScreenExtraWeather,
+		timerManager:        timerManager,
 	}
 }
 
@@ -71,18 +73,10 @@ func (s *State) draw() error {
 		return fmt.Errorf("failed to draw weather screen: %w", err)
 	}
 
-	// todo: сделать красиво
-	// todo: вылезает за границы
-	now := time.Now()
-	if now.Weekday() != time.Sunday && now.Weekday() != time.Saturday && now.Hour() == 8 && now.Minute() >= 20 && now.Minute() <= 40 {
-		if now.Minute()%3 == 0 {
-			if err := s.screens.DrawExtraWeater(data.YandexData); err != nil {
-				return fmt.Errorf("failed to draw extra weather screen: %w", err)
-			}
-		} else {
-			if err = s.drawTimerState(); err != nil {
-				return fmt.Errorf("failed to draw timer screen: %w", err)
-			}
+	// todo: пеоеключать таймер и extra weather
+	if active := s.timerManager.ActiveTimer(); active != nil {
+		if err = s.drawTimerState(active); err != nil {
+			return fmt.Errorf("failed to draw timer screen: %w", err)
 		}
 	} else {
 		if err := s.drawBottomState(data); err != nil {
@@ -127,15 +121,12 @@ func (s *State) drawBottomState(data *types.CollectedData) error {
 	return nil
 }
 
-func (s *State) drawTimerState() error {
-	now := time.Now()
-	from := time.Date(now.Year(), now.Month(), now.Day(), 8, 20, 0, 0, now.Location())
-	to := time.Date(now.Year(), now.Month(), now.Day(), 8, 40, 0, 0, now.Location())
-	if err := s.screens.DrawTimer(from, to); err != nil {
+func (s *State) drawTimerState(active *timer.ActiveTimer) error {
+	if err := s.screens.DrawTimer(active.From, active.To); err != nil {
 		return fmt.Errorf("failed to draw timer screen: %w", err)
 	}
 
-	if now.Minute() == 20 || now.Minute() == 40 {
+	if active.IsBoundary() {
 		s.device.PlayBuzzer(100, 100, 500)
 	} else {
 		s.device.PlayBuzzer(100, 0, 100)

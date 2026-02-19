@@ -21,7 +21,7 @@ func (s *Screens) DrawExtraWeater(data *types.YandexData) error {
 	offsetX := 2
 	for _, item := range s.futureWeatherItems(data) {
 		if item.name == splitterName {
-			s.image.DrawRect(offsetX-2, startY-6, 1, 23, color.RGBA{50, 50, 50, 255})
+			s.image.DrawRect(offsetX-2, startY-6, 1, 23, color.RGBA{100, 100, 100, 255})
 			offsetX += 2
 			continue
 		}
