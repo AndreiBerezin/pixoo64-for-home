@@ -7,8 +7,8 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
 )
 
-func (s *Screens) DrawTimer(from, to time.Time) error {
-	startY := 45
+func (s *Screens) DrawTopTimer(from, to time.Time) error {
+	startY := 19
 
 	allDuration := to.Sub(from)
 	diffDuration := time.Until(to)

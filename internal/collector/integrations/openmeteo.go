@@ -21,7 +21,7 @@ func NewOpenMeteo() *OpenMeteo {
 }
 
 func (o *OpenMeteo) Data() (*types.PressureData, error) {
-	log.Info("Getting pressure data from OpenMeteo...")
+	log.Info("Getting pressure data...")
 
 	var response *openMeteoResponse
 	var err error

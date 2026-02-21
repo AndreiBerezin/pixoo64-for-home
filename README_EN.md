@@ -1,6 +1,6 @@
 <div align="center">
 
-**English** | [Русский](README.md)
+[Русский](README.md) | **English**
 
 # pixoo64-for-home
 
@@ -35,7 +35,7 @@ Morning, daytime, evening, night — icon and temperature. Only shows periods re
 <td width="50%" valign="top">
 
 🧲 **Geomagnetism & pressure**
-Hourly charts for multiple days. Green — normal, yellow — moderate, red — high.
+Hourly charts for multiple days. 🟢 normal, 🟡 deviation, 🔴 bad.
 
 </td>
 <td width="50%" valign="top">
@@ -49,7 +49,7 @@ Sunrise and sunset times. Moon phase icon and lunar day number (0–29).
 <td colspan="2" valign="top">
 
 ⏱️ **Timer**
-Countdown on a cron schedule with a progress bar. Turns red at < 10 minutes, beeps at start and boundary times.
+Countdown on a cron schedule with a progress bar. Beeps every minute.
 
 </td>
 </tr>
@@ -59,21 +59,40 @@ Countdown on a cron schedule with a progress bar. Turns red at < 10 minutes, bee
 
 ## 📸 Screenshots
 
-### Daily forecast
+<table>
+<tr>
+<td width="50%" align="center">
 
-<img src="static/readme/extra_weather.png" alt="extra_weather" width="448"/>
+**Daily forecast**
 
-### Geomagnetism & pressure
+<img src="static/readme/extra_weather.png" alt="extra_weather" width="100%"/>
 
-<img src="static/readme/magnetic_pressure.png" alt="magnetic_pressure" width="448"/>
+</td>
+<td width="50%" align="center">
 
-### Sunrise, sunset & moon
+**Geomagnetism & pressure**
 
-<img src="static/readme/sun_moon.png" alt="sun_moon" width="448"/>
+<img src="static/readme/magnetic_pressure.png" alt="magnetic_pressure" width="100%"/>
 
-### Timer
+</td>
+</tr>
+<tr>
+<td width="50%" align="center">
 
-<img src="static/readme/timer.png" alt="timer" width="448"/>
+**Sunrise, sunset & moon**
+
+<img src="static/readme/sun_moon.png" alt="sun_moon" width="100%"/>
+
+</td>
+<td width="50%" align="center">
+
+**Timer**
+
+<img src="static/readme/timer.png" alt="timer" width="100%"/>
+
+</td>
+</tr>
+</table>
 
 ---
 
@@ -84,6 +103,7 @@ docker run -d \
   --name pixoo64 \
   --restart unless-stopped \
   -e ENV="prod" \
+  -e APP_LANG="en" \
   -e PIXOO_ADDRESS="192.168.0.100" \
   -e YANDEX_WEATHER_KEY="your_key" \
   -e LAT="55.751" \
@@ -103,6 +123,7 @@ cp .env.example .env
 | Variable | Description | Example |
 |---|---|---|
 | `ENV` | `prod` or `dev` (debug — saves `dev_img.png`, skips device rendering) | `prod` |
+| `APP_LANG` | Language for on-screen labels: `ru` or `en` | `ru` |
 | `PIXOO_ADDRESS` | IP address of the Pixoo64 on your local network | `192.168.0.100` |
 | `LAT` | Latitude | `55.751` |
 | `LON` | Longitude | `37.618` |

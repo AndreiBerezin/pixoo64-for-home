@@ -69,19 +69,14 @@ func (s *State) draw() error {
 
 	s.screens.Reset()
 
-	if err = s.screens.DrawCurrentWeather(data.YandexData); err != nil {
-		return fmt.Errorf("failed to draw weather screen: %w", err)
+	if err = s.screens.DrawHeader(); err != nil {
+		return fmt.Errorf("failed to draw header screen: %w", err)
 	}
-
-	// todo: пеоеключать таймер и extra weather
-	if active := s.timerManager.ActiveTimer(); active != nil {
-		if err = s.drawTimerState(active); err != nil {
-			return fmt.Errorf("failed to draw timer screen: %w", err)
-		}
-	} else {
-		if err := s.drawBottomState(data); err != nil {
-			return fmt.Errorf("failed to draw bottom state: %w", err)
-		}
+	if err = s.drawTopState(data); err != nil {
+		return fmt.Errorf("failed to draw top state: %w", err)
+	}
+	if err := s.drawBottomState(data); err != nil {
+		return fmt.Errorf("failed to draw bottom state: %w", err)
 	}
 
 	if env.IsDebug() {
@@ -99,37 +94,43 @@ func (s *State) draw() error {
 	return nil
 }
 
-func (s *State) drawBottomState(data *types.CollectedData) error {
-	switch s.currentBottomScreen {
-	case BottomScreenExtraWeather:
-		if err := s.screens.DrawExtraWeater(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw extra weather screen: %w", err)
+func (s *State) drawTopState(data *types.CollectedData) error {
+	if active := s.timerManager.ActiveTimer(); active != nil {
+		if err := s.screens.DrawTopTimer(active.From, active.To); err != nil {
+			return fmt.Errorf("failed to draw timer screen: %w", err)
 		}
-		s.currentBottomScreen = BottomScreenMagneticPressure
-	case BottomScreenMagneticPressure:
-		if err := s.screens.DrawMagneticPressure(data.MagneticData, data.PressureData); err != nil {
-			return fmt.Errorf("failed to draw magnetic pressure screen: %w", err)
+
+		if active.IsBoundary() {
+			s.device.PlayBuzzer(100, 100, 500)
+		} else {
+			s.device.PlayBuzzer(100, 0, 100)
 		}
-		s.currentBottomScreen = BottomScreenSunMoon
-	case BottomScreenSunMoon:
-		if err := s.screens.DrawSunMoon(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw sun moon screen: %w", err)
+	} else {
+		if err := s.screens.DrawTopCurrentWeather(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw current weather screen: %w", err)
 		}
-		s.currentBottomScreen = BottomScreenExtraWeather
 	}
 
 	return nil
 }
 
-func (s *State) drawTimerState(active *timer.ActiveTimer) error {
-	if err := s.screens.DrawTimer(active.From, active.To); err != nil {
-		return fmt.Errorf("failed to draw timer screen: %w", err)
-	}
-
-	if active.IsBoundary() {
-		s.device.PlayBuzzer(100, 100, 500)
-	} else {
-		s.device.PlayBuzzer(100, 0, 100)
+func (s *State) drawBottomState(data *types.CollectedData) error {
+	switch s.currentBottomScreen {
+	case BottomScreenExtraWeather:
+		if err := s.screens.DrawBottomExtraWeater(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw extra weather screen: %w", err)
+		}
+		s.currentBottomScreen = BottomScreenMagneticPressure
+	case BottomScreenMagneticPressure:
+		if err := s.screens.DrawBottomMagneticPressure(data.MagneticData, data.PressureData); err != nil {
+			return fmt.Errorf("failed to draw magnetic pressure screen: %w", err)
+		}
+		s.currentBottomScreen = BottomScreenSunMoon
+	case BottomScreenSunMoon:
+		if err := s.screens.DrawBottomSunMoon(data.YandexData); err != nil {
+			return fmt.Errorf("failed to draw sun moon screen: %w", err)
+		}
+		s.currentBottomScreen = BottomScreenExtraWeather
 	}
 
 	return nil

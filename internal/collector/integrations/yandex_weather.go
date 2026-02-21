@@ -174,22 +174,22 @@ type moonCode int
 
 func (m moonCode) GetIcon() string {
 	switch int(m) {
-	case 0: // полнолуние
-		return "static/images/moon_0.svg"
-	case 1, 2, 3: // убывающая Луна
-		return "static/images/moon_1-3.svg"
-	case 4: // последняя четверть
-		return "static/images/moon_4.svg"
-	case 5, 6, 7: // убывающая Луна
-		return "static/images/moon_5-7.svg"
-	case 8: // новолуние
-		return "static/images/moon_8.svg"
-	case 9, 10, 11: // растущая Луна
-		return "static/images/moon_9-11.svg"
-	case 12: // первая четверть
-		return "static/images/moon_12.svg"
-	case 13, 14, 15: // растущая Луна
-		return "static/images/moon_13-15.svg"
+	case 0: // full moon
+		return "static/images/moon_0.png"
+	case 1, 2, 3: // waning moon
+		return "static/images/moon_1-3.png"
+	case 4: // last quarter
+		return "static/images/moon_4.png"
+	case 5, 6, 7: // waning moon
+		return "static/images/moon_5-7.png"
+	case 8: // new moon
+		return "static/images/moon_8.png"
+	case 9, 10, 11: // waxing moon
+		return "static/images/moon_9-11.png"
+	case 12: // first quarter
+		return "static/images/moon_12.png"
+	case 13, 14, 15: // waxing moon
+		return "static/images/moon_13-15.png"
 	}
 
 	return ""

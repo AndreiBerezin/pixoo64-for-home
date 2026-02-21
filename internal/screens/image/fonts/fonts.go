@@ -21,7 +21,7 @@ const (
 var Fonts map[FontFace]font.Face
 
 func init() {
-	// 4 для pico8
+	// 4 for pico8
 	Fonts = map[FontFace]font.Face{
 		FontMicro5Normal: newFont("static/fonts/micro5.ttf", 11),
 		FontMicro5Big:    newFont("static/fonts/micro5.ttf", 22),

@@ -7,11 +7,12 @@ import (
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
+	"github.com/AndreiBerezin/pixoo64/pkg/i18n"
 )
 
 const splitterName = "|"
 
-func (s *Screens) DrawExtraWeater(data *types.YandexData) error {
+func (s *Screens) DrawBottomExtraWeater(data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
@@ -47,37 +48,42 @@ func (s *Screens) DrawExtraWeater(data *types.YandexData) error {
 }
 
 func (s *Screens) futureWeatherItems(data *types.YandexData) []item {
+	morningLabel := i18n.MorningLabel()
+	dayLabel := i18n.DayLabel()
+	eveningLabel := i18n.EveningLabel()
+	nightLabel := i18n.NightLabel()
+
 	currentHour := time.Now().Hour()
 	if currentHour <= 11 {
 		return []item{
-			{name: "у", dataItem: data.ByDays[0].Morning},
-			{name: "д", dataItem: data.ByDays[0].Day},
-			{name: "в", dataItem: data.ByDays[0].Evening},
-			{name: "н", dataItem: data.ByDays[0].Night},
+			{name: morningLabel, dataItem: data.ByDays[0].Morning},
+			{name: dayLabel, dataItem: data.ByDays[0].Day},
+			{name: eveningLabel, dataItem: data.ByDays[0].Evening},
+			{name: nightLabel, dataItem: data.ByDays[0].Night},
 		}
 	} else if currentHour <= 17 {
 		return []item{
-			{name: "д", dataItem: data.ByDays[0].Day},
-			{name: "в", dataItem: data.ByDays[0].Evening},
-			{name: "н", dataItem: data.ByDays[0].Night},
+			{name: dayLabel, dataItem: data.ByDays[0].Day},
+			{name: eveningLabel, dataItem: data.ByDays[0].Evening},
+			{name: nightLabel, dataItem: data.ByDays[0].Night},
 			{name: splitterName},
-			{name: "у", dataItem: data.ByDays[1].Morning},
+			{name: morningLabel, dataItem: data.ByDays[1].Morning},
 		}
 	} else if currentHour <= 21 {
 		return []item{
-			{name: "в", dataItem: data.ByDays[0].Evening},
-			{name: "н", dataItem: data.ByDays[0].Night},
+			{name: eveningLabel, dataItem: data.ByDays[0].Evening},
+			{name: nightLabel, dataItem: data.ByDays[0].Night},
 			{name: splitterName},
-			{name: "у", dataItem: data.ByDays[1].Morning},
-			{name: "д", dataItem: data.ByDays[1].Day},
+			{name: morningLabel, dataItem: data.ByDays[1].Morning},
+			{name: dayLabel, dataItem: data.ByDays[1].Day},
 		}
 	} else if currentHour <= 23 {
 		return []item{
-			{name: "н", dataItem: data.ByDays[0].Night},
+			{name: nightLabel, dataItem: data.ByDays[0].Night},
 			{name: splitterName},
-			{name: "у", dataItem: data.ByDays[1].Morning},
-			{name: "д", dataItem: data.ByDays[1].Day},
-			{name: "в", dataItem: data.ByDays[1].Evening},
+			{name: morningLabel, dataItem: data.ByDays[1].Morning},
+			{name: dayLabel, dataItem: data.ByDays[1].Day},
+			{name: eveningLabel, dataItem: data.ByDays[1].Evening},
 		}
 	} else {
 		return []item{}

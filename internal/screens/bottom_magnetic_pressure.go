@@ -7,7 +7,7 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
 )
 
-func (s *Screens) DrawMagneticPressure(magneticData *types.MagneticData, pressureData *types.PressureData) error {
+func (s *Screens) DrawBottomMagneticPressure(magneticData *types.MagneticData, pressureData *types.PressureData) error {
 	if magneticData == nil || pressureData == nil {
 		return nil
 	}
