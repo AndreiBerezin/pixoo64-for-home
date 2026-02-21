@@ -18,40 +18,15 @@ Shows weather, geomagnetism, moon phases, and a countdown timer on the Divoom Pi
 
 <table>
 <tr>
-<td width="50%" valign="top">
-
-🌤️ **Current weather**
-Temperature, feels-like, wind speed and direction, weather icon. Always on the top half of the screen.
-
-</td>
-<td width="50%" valign="top">
-
-📅 **Daily forecast**
-Morning, daytime, evening, night — icon and temperature. Only shows periods relevant to the current time.
-
-</td>
+<td width="50%" valign="top">🌤️ <b>Current weather</b><br/>Temperature, feels-like, wind speed and direction, weather icon. Always on the top half of the screen.</td>
+<td width="50%" valign="top">📅 <b>Daily forecast</b><br/>Morning, daytime, evening, night — icon and temperature. Only shows periods relevant to the current time.</td>
 </tr>
 <tr>
-<td width="50%" valign="top">
-
-🧲 **Geomagnetism & pressure**
-Hourly charts for multiple days. 🟢 normal, 🟡 deviation, 🔴 bad.
-
-</td>
-<td width="50%" valign="top">
-
-🌙 **Sunrise, sunset & moon**
-Sunrise and sunset times. Moon phase icon and lunar day number (0–29).
-
-</td>
+<td width="50%" valign="top">🧲 <b>Geomagnetism & pressure</b><br/>Hourly charts for multiple days. 🟢 normal, 🟡 deviation, 🔴 bad.</td>
+<td width="50%" valign="top">🌙 <b>Sunrise, sunset & moon</b><br/>Sunrise and sunset times. Moon phase icon and lunar day number (0–29).</td>
 </tr>
 <tr>
-<td colspan="2" valign="top">
-
-⏱️ **Timer**
-Countdown on a cron schedule with a progress bar. Beeps every minute.
-
-</td>
+<td width="50%" valign="top">⏱️ <b>Timer</b><br/>Countdown on a cron schedule with a progress bar. Beeps every minute.</td>
 </tr>
 </table>
 
@@ -61,35 +36,19 @@ Countdown on a cron schedule with a progress bar. Beeps every minute.
 
 <table>
 <tr>
-<td width="50%" align="center">
-
-**Daily forecast**
-
-<img src="static/readme/extra_weather.png" alt="extra_weather" width="100%"/>
-
+<td width="50%" style="padding: 16px">
+Daily forecast<br/><img src="static/readme/extra_weather.png" alt="extra_weather" width="400"/>
 </td>
-<td width="50%" align="center">
-
-**Geomagnetism & pressure**
-
-<img src="static/readme/magnetic_pressure.png" alt="magnetic_pressure" width="100%"/>
-
+<td width="50%" style="padding: 16px">
+Geomagnetism & pressure<br/><img src="static/readme/magnetic_pressure.png" alt="magnetic_pressure" width="400"/>
 </td>
 </tr>
 <tr>
-<td width="50%" align="center">
-
-**Sunrise, sunset & moon**
-
-<img src="static/readme/sun_moon.png" alt="sun_moon" width="100%"/>
-
+<td width="50%" style="padding: 16px">
+Sunrise, sunset & moon<br/><img src="static/readme/sun_moon.png" alt="sun_moon" width="400"/>
 </td>
-<td width="50%" align="center">
-
-**Timer**
-
-<img src="static/readme/timer.png" alt="timer" width="100%"/>
-
+<td width="50%" style="padding: 16px">
+Timer<br/><img src="static/readme/timer.png" alt="timer" width="400"/>
 </td>
 </tr>
 </table>
