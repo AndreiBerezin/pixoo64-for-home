@@ -7,12 +7,14 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
 )
 
-func (s *Screens) DrawBottomMagneticPressure(magneticData *types.MagneticData, pressureData *types.PressureData) error {
+func (s *Screens) DrawBottomMagneticPressure(data *types.CollectedData) error {
+	return s.drawMagneticPressure(37, data.MagneticData, data.PressureData)
+}
+
+func (s *Screens) drawMagneticPressure(startY int, magneticData *types.MagneticData, pressureData *types.PressureData) error {
 	if magneticData == nil || pressureData == nil {
 		return nil
 	}
-
-	startY := 37
 
 	s.image.DrawPNGFromFile("static/images/magnet.png", 2, startY, 6)
 

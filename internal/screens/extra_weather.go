@@ -12,12 +12,18 @@ import (
 
 const splitterName = "|"
 
-func (s *Screens) DrawBottomExtraWeater(data *types.YandexData) error {
+func (s *Screens) DrawTopExtraWeater(data *types.CollectedData) error {
+	return s.drawExtraWeather(18, data.YandexData)
+}
+
+func (s *Screens) DrawBottomExtraWeater(data *types.CollectedData) error {
+	return s.drawExtraWeather(45, data.YandexData)
+}
+
+func (s *Screens) drawExtraWeather(startY int, data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
-
-	startY := 45
 
 	offsetX := 2
 	for _, item := range s.futureWeatherItems(data) {

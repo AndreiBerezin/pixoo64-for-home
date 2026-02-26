@@ -21,29 +21,46 @@ const (
 	deviceWidth  = 64
 	deviceHeight = 64
 
-	BottomScreenExtraWeather     = 0
-	BottomScreenMagneticPressure = 1
-	BottomScreenSunMoon          = 2
-
 	drawInterval  = 1 * time.Minute
 	errorInterval = 5 * time.Minute
 )
 
+type drawFn func(*types.CollectedData) error
+
+type rotation struct {
+	timerTopScreens []drawFn
+	timerTopIdx     int
+
+	defaultBottomScreens []drawFn
+	defaultBottomIdx     int
+}
+
 type State struct {
-	device              *pixoo64.Pixoo64
-	collector           *collector.Collector
-	currentBottomScreen int
-	screens             *screens.Screens
-	timerManager        *timer.Manager
+	device       *pixoo64.Pixoo64
+	collector    *collector.Collector
+	screens      *screens.Screens
+	timerManager *timer.Manager
+	rotation     rotation
 }
 
 func New(collector *collector.Collector, timerManager *timer.Manager) *State {
+	sc := screens.New(deviceWidth, deviceHeight)
 	return &State{
-		device:              pixoo64.New(deviceWidth, deviceHeight),
-		collector:           collector,
-		screens:             screens.New(deviceWidth, deviceHeight),
-		currentBottomScreen: BottomScreenExtraWeather,
-		timerManager:        timerManager,
+		device:       pixoo64.New(deviceWidth, deviceHeight),
+		collector:    collector,
+		screens:      sc,
+		timerManager: timerManager,
+		rotation: rotation{
+			timerTopScreens: []drawFn{
+				sc.DrawTopCurrentWeather,
+				sc.DrawTopExtraWeater,
+			},
+			defaultBottomScreens: []drawFn{
+				sc.DrawBottomExtraWeater,
+				sc.DrawBottomMagneticPressure,
+				sc.DrawBottomSunMoon,
+			},
+		},
 	}
 }
 
@@ -72,11 +89,15 @@ func (s *State) draw() error {
 	if err = s.screens.DrawHeader(); err != nil {
 		return fmt.Errorf("failed to draw header screen: %w", err)
 	}
-	if err = s.drawTopState(data); err != nil {
-		return fmt.Errorf("failed to draw top state: %w", err)
-	}
-	if err := s.drawBottomState(data); err != nil {
-		return fmt.Errorf("failed to draw bottom state: %w", err)
+
+	if activeTimer := s.timerManager.ActiveTimer(); activeTimer != nil {
+		if err = s.drawTimerState(data, activeTimer); err != nil {
+			return fmt.Errorf("failed to draw timer state: %w", err)
+		}
+	} else {
+		if err = s.drawDefaultState(data); err != nil {
+			return fmt.Errorf("failed to draw default state: %w", err)
+		}
 	}
 
 	if env.IsDebug() {
@@ -94,44 +115,28 @@ func (s *State) draw() error {
 	return nil
 }
 
-func (s *State) drawTopState(data *types.CollectedData) error {
-	if active := s.timerManager.ActiveTimer(); active != nil {
-		if err := s.screens.DrawTopTimer(active.From, active.To); err != nil {
-			return fmt.Errorf("failed to draw timer screen: %w", err)
-		}
+func (s *State) drawTimerState(data *types.CollectedData, activeTimer *timer.ActiveTimer) error {
+	if err := s.rotation.timerTopScreens[s.rotation.timerTopIdx](data); err != nil {
+		return fmt.Errorf("failed to draw top screen: %w", err)
+	}
+	s.rotation.timerTopIdx = (s.rotation.timerTopIdx + 1) % len(s.rotation.timerTopScreens)
 
-		if active.IsBoundary() {
-			s.device.PlayBuzzer(100, 100, 500)
-		} else {
-			s.device.PlayBuzzer(100, 0, 100)
-		}
-	} else {
-		if err := s.screens.DrawTopCurrentWeather(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw current weather screen: %w", err)
-		}
+	if err := s.screens.DrawBottomTimer(activeTimer.From, activeTimer.To); err != nil {
+		return fmt.Errorf("failed to draw bottom timer screen: %w", err)
 	}
 
 	return nil
 }
 
-func (s *State) drawBottomState(data *types.CollectedData) error {
-	switch s.currentBottomScreen {
-	case BottomScreenExtraWeather:
-		if err := s.screens.DrawBottomExtraWeater(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw extra weather screen: %w", err)
-		}
-		s.currentBottomScreen = BottomScreenMagneticPressure
-	case BottomScreenMagneticPressure:
-		if err := s.screens.DrawBottomMagneticPressure(data.MagneticData, data.PressureData); err != nil {
-			return fmt.Errorf("failed to draw magnetic pressure screen: %w", err)
-		}
-		s.currentBottomScreen = BottomScreenSunMoon
-	case BottomScreenSunMoon:
-		if err := s.screens.DrawBottomSunMoon(data.YandexData); err != nil {
-			return fmt.Errorf("failed to draw sun moon screen: %w", err)
-		}
-		s.currentBottomScreen = BottomScreenExtraWeather
+func (s *State) drawDefaultState(data *types.CollectedData) error {
+	if err := s.screens.DrawTopCurrentWeather(data); err != nil {
+		return fmt.Errorf("failed to draw top current weather screen: %w", err)
 	}
+
+	if err := s.rotation.defaultBottomScreens[s.rotation.defaultBottomIdx](data); err != nil {
+		return fmt.Errorf("failed to draw bottom screen: %w", err)
+	}
+	s.rotation.defaultBottomIdx = (s.rotation.defaultBottomIdx + 1) % len(s.rotation.defaultBottomScreens)
 
 	return nil
 }

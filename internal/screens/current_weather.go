@@ -11,7 +11,11 @@ import (
 	"github.com/AndreiBerezin/pixoo64/pkg/i18n"
 )
 
-func (s *Screens) DrawTopCurrentWeather(data *types.YandexData) error {
+func (s *Screens) DrawTopCurrentWeather(data *types.CollectedData) error {
+	return s.drawCurrentWeather(11, data.YandexData)
+}
+
+func (s *Screens) drawCurrentWeather(startY int, data *types.YandexData) error {
 	if data == nil {
 		return nil
 	}
@@ -20,8 +24,6 @@ func (s *Screens) DrawTopCurrentWeather(data *types.YandexData) error {
 	data.Weather.FeelsLikeTemperature = -22
 	data.Weather.WindSpeed = 22
 	data.Weather.WindDirection = "sw"*/
-
-	startY := 11
 
 	err := s.image.DrawSVGFromURL(data.CurrentWeather.Icon, 1, startY, 20)
 	if err != nil {
@@ -48,7 +50,6 @@ func (s *Screens) DrawTopCurrentWeather(data *types.YandexData) error {
 
 	return nil
 }
-
 
 func (s *Screens) drawHouseWind(direction string) {
 	startX := 54

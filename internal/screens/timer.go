@@ -7,9 +7,11 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/screens/image/fonts"
 )
 
-func (s *Screens) DrawTopTimer(from, to time.Time) error {
-	startY := 19
+func (s *Screens) DrawBottomTimer(from time.Time, to time.Time) error {
+	return s.drawTimer(45, from, to)
+}
 
+func (s *Screens) drawTimer(startY int, from time.Time, to time.Time) error {
 	allDuration := to.Sub(from)
 	diffDuration := time.Until(to)
 
