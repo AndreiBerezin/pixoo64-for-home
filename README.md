@@ -61,6 +61,7 @@
 docker run -d \
   --name pixoo64 \
   --restart unless-stopped \
+  -p 8080:8080 \
   -e ENV="prod" \
   -e APP_LANG="ru" \
   -e PIXOO_ADDRESS="192.168.0.100" \

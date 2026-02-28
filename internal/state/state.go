@@ -1,10 +1,7 @@
 package state
 
 import (
-	"fmt"
-	"image"
-	"image/png"
-	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
@@ -12,7 +9,6 @@ import (
 	"github.com/AndreiBerezin/pixoo64/internal/pixoo64"
 	"github.com/AndreiBerezin/pixoo64/internal/screens"
 	"github.com/AndreiBerezin/pixoo64/internal/timer"
-	"github.com/AndreiBerezin/pixoo64/pkg/env"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
 	"go.uber.org/zap"
 )
@@ -28,11 +24,18 @@ const (
 type drawFn func(*types.CollectedData) error
 
 type rotation struct {
-	timerTopScreens []drawFn
-	timerTopIdx     int
-
+	customTopScreens     []drawFn
+	customTopIdx         int
 	defaultBottomScreens []drawFn
 	defaultBottomIdx     int
+}
+
+func (r *rotation) nextCustomTop() {
+	r.customTopIdx = (r.customTopIdx + 1) % len(r.customTopScreens)
+}
+
+func (r *rotation) nextDefaultBottom() {
+	r.defaultBottomIdx = (r.defaultBottomIdx + 1) % len(r.defaultBottomScreens)
 }
 
 type State struct {
@@ -41,6 +44,16 @@ type State struct {
 	screens      *screens.Screens
 	timerManager *timer.Manager
 	rotation     rotation
+
+	onAir          atomic.Bool
+	onAirStartTime time.Time
+}
+
+func (s *State) SetOnAir(on bool) {
+	s.onAir.Store(on)
+	if on {
+		s.onAirStartTime = time.Now()
+	}
 }
 
 func New(collector *collector.Collector, timerManager *timer.Manager) *State {
@@ -51,7 +64,7 @@ func New(collector *collector.Collector, timerManager *timer.Manager) *State {
 		screens:      sc,
 		timerManager: timerManager,
 		rotation: rotation{
-			timerTopScreens: []drawFn{
+			customTopScreens: []drawFn{
 				sc.DrawTopCurrentWeather,
 				sc.DrawTopExtraWeater,
 			},
@@ -76,82 +89,4 @@ func (s *State) Start() {
 			time.Sleep(drawInterval)
 		}
 	}()
-}
-
-func (s *State) draw() error {
-	data, err := s.collector.CollectedData()
-	if err != nil {
-		return fmt.Errorf("failed to get collected data: %w", err)
-	}
-
-	s.screens.Reset()
-
-	if err = s.screens.DrawHeader(); err != nil {
-		return fmt.Errorf("failed to draw header screen: %w", err)
-	}
-
-	if activeTimer := s.timerManager.ActiveTimer(); activeTimer != nil {
-		if err = s.drawTimerState(data, activeTimer); err != nil {
-			return fmt.Errorf("failed to draw timer state: %w", err)
-		}
-	} else {
-		if err = s.drawDefaultState(data); err != nil {
-			return fmt.Errorf("failed to draw default state: %w", err)
-		}
-	}
-
-	if env.IsDebug() {
-		if err = devImgDraw(s.screens.Image()); err != nil {
-			return fmt.Errorf("failed to draw dev image: %w", err)
-		}
-	}
-
-	if err = s.device.DrawImage(s.screens.Image()); err != nil {
-		return fmt.Errorf("failed to draw pixoo64: %w", err)
-	}
-
-	log.Debug("data draw finished")
-
-	return nil
-}
-
-func (s *State) drawTimerState(data *types.CollectedData, activeTimer *timer.ActiveTimer) error {
-	if err := s.rotation.timerTopScreens[s.rotation.timerTopIdx](data); err != nil {
-		return fmt.Errorf("failed to draw top screen: %w", err)
-	}
-	s.rotation.timerTopIdx = (s.rotation.timerTopIdx + 1) % len(s.rotation.timerTopScreens)
-
-	if err := s.screens.DrawBottomTimer(activeTimer.From, activeTimer.To); err != nil {
-		return fmt.Errorf("failed to draw bottom timer screen: %w", err)
-	}
-
-	return nil
-}
-
-func (s *State) drawDefaultState(data *types.CollectedData) error {
-	if err := s.screens.DrawTopCurrentWeather(data); err != nil {
-		return fmt.Errorf("failed to draw top current weather screen: %w", err)
-	}
-
-	if err := s.rotation.defaultBottomScreens[s.rotation.defaultBottomIdx](data); err != nil {
-		return fmt.Errorf("failed to draw bottom screen: %w", err)
-	}
-	s.rotation.defaultBottomIdx = (s.rotation.defaultBottomIdx + 1) % len(s.rotation.defaultBottomScreens)
-
-	return nil
-}
-
-func devImgDraw(image *image.RGBA) error {
-	filename := "dev_img.png"
-	file, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
-
-	png.Encode(file, image)
-
-	log.Debug("success draw dev image to " + filename)
-
-	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector"
+	"github.com/AndreiBerezin/pixoo64/internal/server"
 	"github.com/AndreiBerezin/pixoo64/internal/state"
 	"github.com/AndreiBerezin/pixoo64/internal/timer"
 	"github.com/AndreiBerezin/pixoo64/pkg/log"
@@ -34,6 +35,9 @@ func main() {
 
 	state := state.New(collector, timerManager)
 	state.Start()
+
+	srv := server.New(os.Getenv("SERVER_ADDRESS"), state)
+	go srv.Start()
 
 	waitShutdownSignal()
 }

@@ -61,6 +61,7 @@ Timer<br/><img src="static/readme/timer.png" alt="timer" width="400"/>
 docker run -d \
   --name pixoo64 \
   --restart unless-stopped \
+  -p 8080:8080 \
   -e ENV="prod" \
   -e APP_LANG="en" \
   -e PIXOO_ADDRESS="192.168.0.100" \
