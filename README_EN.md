@@ -120,6 +120,44 @@ Open [Yandex Maps](https://yandex.ru/maps) or [Google Maps](https://maps.google.
 
 ---
 
+## 🎙️ micwatch — microphone indicator (macOS)
+
+`micwatch` is a macOS background agent that monitors the microphone state via CoreAudio and sends HTTP requests to pixoo64-for-home when the mic turns on or off. Useful for showing an "on air" indicator on the display during calls.
+
+**Requirements:** macOS 12.0+
+
+### Installation
+
+```bash
+cd micwatch
+make install                    # build + copy binary to ~/bin
+make start HOST=192.168.0.100   # register as a LaunchAgent
+```
+
+`HOST` is the IP address of the machine running pixoo64-for-home. After `make start` the agent starts immediately and launches automatically on every login.
+
+### Manual build
+
+Requires `swiftc` (included with Xcode Command Line Tools):
+
+```bash
+xcode-select --install  # if not installed
+cd micwatch
+make build              # universal binary build/micwatch (arm64 + x86_64)
+```
+
+### Management
+
+| Command | Action |
+|---|---|
+| `make start HOST=...` | Start |
+| `make stop` | Stop |
+| `make restart HOST=...` | Restart |
+| `make status` | Status |
+| `make uninstall` | Remove agent and binary |
+
+---
+
 ## 🛠️ Local development
 
 ```bash

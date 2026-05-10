@@ -40,6 +40,7 @@ build:
 	main.swift -o $(X64_BIN)
 
 	lipo -create -output $(UNIV_BIN) $(ARM_BIN) $(X64_BIN)
+	rm -f $(ARM_BIN) $(X64_BIN)
 	file $(UNIV_BIN)
 
 install: build
