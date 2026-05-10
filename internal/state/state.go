@@ -19,6 +19,7 @@ const (
 
 	drawInterval      = 1 * time.Minute
 	timerDrawInterval = 20 * time.Second
+	timerBeepInterval = 1 * time.Minute
 	errorInterval     = 5 * time.Minute
 )
 
@@ -46,8 +47,9 @@ type State struct {
 	timerManager *timer.Manager
 	rotation     rotation
 
-	onAir          atomic.Bool
-	onAirStartTime time.Time
+	onAir             atomic.Bool
+	onAirStartTime    time.Time
+	lastTimerBeepTime time.Time
 }
 
 func (s *State) SetOnAir(on bool) {

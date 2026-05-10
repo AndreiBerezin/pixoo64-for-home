@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"time"
 
 	"github.com/AndreiBerezin/pixoo64/internal/collector/types"
 	"github.com/AndreiBerezin/pixoo64/pkg/env"
@@ -89,10 +90,13 @@ func (s *State) drawTimerState(data *types.CollectedData) error {
 		return fmt.Errorf("failed to draw bottom timer screen: %w", err)
 	}
 
-	if activeTimer.IsBoundary() {
-		s.device.PlayBuzzer(100, 100, 500)
-	} else {
-		s.device.PlayBuzzer(100, 0, 100)
+	if time.Since(s.lastTimerBeepTime) >= timerBeepInterval {
+		if activeTimer.IsBoundary() {
+			s.device.PlayBuzzer(100, 100, 500)
+		} else {
+			s.device.PlayBuzzer(100, 0, 100)
+		}
+		s.lastTimerBeepTime = time.Now()
 	}
 
 	return nil
