@@ -27,6 +27,7 @@
 </tr>
 <tr>
 <td width="50%" valign="top">⏱️ <b>Таймер</b><br/>Обратный отсчёт по cron-расписанию с прогресс-баром. Пищит каждую минуту.</td>
+<td width="50%" valign="top">🔴 <b>ON AIR</b><br/>Индикатор «в эфире» на нижней половине экрана во время звонков. Активируется через <b>micwatch</b> при захвате микрофона.</td>
 </tr>
 </table>
 
@@ -49,6 +50,11 @@
 </td>
 <td width="50%" style="padding: 16px">
 Таймер<br/><img src="static/readme/timer.png" alt="timer" width="400"/>
+</td>
+</tr>
+<tr>
+<td width="50%" style="padding: 16px">
+ON AIR<br/><img src="static/readme/on_air.png" alt="on_air" width="400"/>
 </td>
 </tr>
 </table>

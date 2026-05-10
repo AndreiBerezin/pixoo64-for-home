@@ -27,6 +27,7 @@ Shows weather, geomagnetism, moon phases, and a countdown timer on the Divoom Pi
 </tr>
 <tr>
 <td width="50%" valign="top">⏱️ <b>Timer</b><br/>Countdown on a cron schedule with a progress bar. Beeps every minute.</td>
+<td width="50%" valign="top">🔴 <b>ON AIR</b><br/>On-air indicator on the bottom half of the screen during calls. Activated by <b>micwatch</b> when the microphone is in use.</td>
 </tr>
 </table>
 
@@ -49,6 +50,11 @@ Sunrise, sunset & moon<br/><img src="static/readme/sun_moon.png" alt="sun_moon" 
 </td>
 <td width="50%" style="padding: 16px">
 Timer<br/><img src="static/readme/timer.png" alt="timer" width="400"/>
+</td>
+</tr>
+<tr>
+<td width="50%" style="padding: 16px">
+ON AIR<br/><img src="static/readme/on_air.png" alt="on_air" width="400"/>
 </td>
 </tr>
 </table>
