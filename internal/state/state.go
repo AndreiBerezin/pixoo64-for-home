@@ -17,8 +17,9 @@ const (
 	deviceWidth  = 64
 	deviceHeight = 64
 
-	drawInterval  = 1 * time.Minute
-	errorInterval = 5 * time.Minute
+	drawInterval      = 1 * time.Minute
+	timerDrawInterval = 20 * time.Second
+	errorInterval     = 5 * time.Minute
 )
 
 type drawFn func(*types.CollectedData) error
@@ -86,7 +87,12 @@ func (s *State) Start() {
 				continue
 			}
 
-			time.Sleep(drawInterval)
+			isTimerActive := s.timerManager.ActiveTimer() != nil
+			if isTimerActive {
+				time.Sleep(timerDrawInterval)
+			} else {
+				time.Sleep(drawInterval)
+			}
 		}
 	}()
 }
