@@ -102,7 +102,7 @@ func (o *OpenMeteo) mockResponse() (*openMeteoResponse, error) {
 }
 
 func (o *OpenMeteo) callApi() (*openMeteoResponse, error) {
-	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=surface_pressure&forecast_days=3&timezone=auto",
+	url := fmt.Sprintf("https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=surface_pressure&forecast_days=3&timezone=auto",
 		os.Getenv("LAT"), os.Getenv("LON"),
 	)
 
